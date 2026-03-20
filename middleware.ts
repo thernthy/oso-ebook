@@ -3,18 +3,18 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // Which roles can access which route prefixes
 const ROUTE_ROLES: Record<string, string[]> = {
-  '/dashboard/oso':     ['oso'],
-  '/dashboard/partner': ['oso', 'partner'],
-  '/dashboard/author':  ['oso', 'partner', 'author'],
-  '/dashboard/reader':  ['oso', 'partner', 'author', 'reader'],
+  '/oso':     ['oso'],
+  '/partner': ['oso', 'partner'],
+  '/author':  ['oso', 'partner', 'author'],
+  '/reader':  ['oso', 'partner', 'author', 'reader'],
 }
 
 // Role -> default dashboard
 const ROLE_HOME: Record<string, string> = {
-  oso:     '/dashboard/oso',
-  partner: '/dashboard/partner',
-  author:  '/dashboard/author',
-  reader:  '/dashboard/reader',
+  oso:     '/oso',
+  partner: '/partner',
+  author:  '/author',
+  reader:  '/reader',
 }
 
 export async function middleware(req: NextRequest) {
@@ -23,13 +23,13 @@ export async function middleware(req: NextRequest) {
 
   // Already logged in and hitting /auth/login → redirect to their dashboard
   if (pathname === '/auth/login' && token) {
-    const home = ROLE_HOME[token.role as string] ?? '/dashboard/reader'
+    const home = ROLE_HOME[token.role as string] ?? '/reader'
     return NextResponse.redirect(new URL(home, req.url))
   }
 
   // Check dashboard routes
   const matchedRoute = Object.keys(ROUTE_ROLES).find(route =>
-    pathname.startsWith(route)
+    pathname === route || pathname.startsWith(`${route}/`)
   )
 
   if (matchedRoute) {
@@ -43,7 +43,7 @@ export async function middleware(req: NextRequest) {
     // Wrong role → send to their own dashboard
     const allowed = ROUTE_ROLES[matchedRoute]
     if (!allowed.includes(token.role as string)) {
-      const home = ROLE_HOME[token.role as string] ?? '/dashboard/reader'
+      const home = ROLE_HOME[token.role as string] ?? '/reader'
       return NextResponse.redirect(new URL(home, req.url))
     }
   }
@@ -52,5 +52,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/auth/login'],
+  matcher: ['/oso/:path*', '/partner/:path*', '/author/:path*', '/reader/:path*', '/auth/login'],
 }
