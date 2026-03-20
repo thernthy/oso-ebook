@@ -427,8 +427,7 @@ export default function CoverUpload({ bookId, currentCover, bookStatus }: Props)
 
       {/* Initialise canvas on mount when preview is ready */}
       {stage === 'preview' && analysis?.needs_crop && imageB64 && crop && (
-        <canvas ref={canvasRef} style={{ display:'none' }}
-          ref={(el: any) => {
+        <canvas style={{ display:'none' }} ref={(el: any) => {
             if (el && imageB64) regeneratePreview(imageB64, crop, analysis)
           }} />
       )}

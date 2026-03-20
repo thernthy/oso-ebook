@@ -2,10 +2,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
 import pool                 from '@/lib/db'
 import { notFound }         from 'next/navigation'
+import Link                 from 'next/link'
 import BookUploadPanel      from '@/components/author/BookUploadPanel'
 import ChapterList          from '@/components/author/ChapterList'
 import BookActions          from '@/components/author/BookActions'
 import CoverUpload          from '@/components/author/CoverUpload'
+import BookSettings         from '@/components/author/BookSettings'
 
 type Params = { params: { id: string } }
 
@@ -13,44 +15,70 @@ export default async function BookDetailPage({ params }: Params) {
   const session = await getServerSession(authOptions)
   const userId  = session!.user.id
 
-  // Fetch book
-  const [books] = await pool.execute(
-    `SELECT b.*, p.name AS partner_name
-     FROM books b
-     LEFT JOIN users p ON b.partner_id = p.id
-     WHERE b.id = ? AND b.author_id = ? LIMIT 1`,
-    [params.id, userId]
-  ) as any[]
+  const [
+    [books],
+    [chapters],
+    [files],
+    [stats],
+  ] = await Promise.all([
+    pool.execute(
+      `SELECT b.*, p.name AS partner_name
+       FROM books b
+       LEFT JOIN users p ON b.partner_id = p.id
+       WHERE b.id = ? AND b.author_id = ? LIMIT 1`,
+      [params.id, userId]
+    ),
+    pool.execute(
+      `SELECT id, chapter_num, title, word_count, is_published, source, ai_confidence, created_at
+       FROM chapters WHERE book_id = ? ORDER BY chapter_num ASC`,
+      [params.id]
+    ),
+    pool.execute(
+      `SELECT bf.id, bf.format, bf.original_name, bf.file_size, bf.status AS file_status,
+              aj.id AS job_id, aj.status AS ai_status, aj.chapters_found,
+              aj.error_msg AS ai_error, aj.finished_at
+       FROM book_files bf
+       LEFT JOIN ai_jobs aj ON aj.file_id = bf.id
+       WHERE bf.book_id = ?
+       ORDER BY bf.uploaded_at DESC LIMIT 1`,
+      [params.id]
+    ),
+    pool.execute(
+      `SELECT 
+         COUNT(CASE WHEN is_published = 1 THEN 1 END) AS published_chapters,
+         COALESCE(SUM(word_count), 0) AS total_words,
+         COALESCE((SELECT SUM(rp.reading_time_seconds) FROM reading_progress rp JOIN users u ON rp.user_id = u.id WHERE rp.book_id = ?), 0) AS total_reading_time
+       FROM chapters WHERE book_id = ?`,
+      [params.id, params.id]
+    ),
+  ]) as any[]
+
   const book = (books as any[])[0]
   if (!book) notFound()
 
-  // Fetch chapters
-  const [chapters] = await pool.execute(
-    `SELECT id, chapter_num, title, word_count, is_published, source, ai_confidence, created_at
-     FROM chapters WHERE book_id = ? ORDER BY chapter_num ASC`,
-    [params.id]
-  ) as any[]
-
-  // Fetch latest upload + AI job status
-  const [files] = await pool.execute(
-    `SELECT bf.id, bf.format, bf.original_name, bf.file_size, bf.status AS file_status,
-            aj.id AS job_id, aj.status AS ai_status, aj.chapters_found,
-            aj.error_msg AS ai_error, aj.finished_at
-     FROM book_files bf
-     LEFT JOIN ai_jobs aj ON aj.file_id = bf.id
-     WHERE bf.book_id = ?
-     ORDER BY bf.uploaded_at DESC LIMIT 1`,
-    [params.id]
-  ) as any[]
   const latestFile = (files as any[])[0] || null
+  const bookStats = (stats as any[])[0] || {}
 
   const statusColors: Record<string, string> = {
     published: '#3dd6a3', in_review: '#9d7df5', draft: '#6b6b78', rejected: '#f07060',
   }
   const statusColor = statusColors[book.status] || '#6b6b78'
 
+  const formatReadingTime = (seconds: number) => {
+    if (seconds < 60) return `${seconds}s`
+    if (seconds < 3600) return `${Math.round(seconds/60)}m`
+    return `${Math.round(seconds/3600)}h ${Math.round((seconds%3600)/60)}m`
+  }
+
   return (
     <div style={{ flex:1, overflowY:'auto', padding:'24px 28px', display:'flex', flexDirection:'column', gap:20 }}>
+
+      {/* Breadcrumb */}
+      <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'#635e80' }}>
+        <Link href="/author/books" style={{ color:'#635e80', textDecoration:'none' }}>My Books</Link>
+        <span>›</span>
+        <span style={{ color:'#9d7df5' }}>{book.title}</span>
+      </div>
 
       {/* Header */}
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
@@ -75,6 +103,22 @@ export default async function BookDetailPage({ params }: Params) {
         <BookActions book={book} chapterCount={(chapters as any[]).length} />
       </div>
 
+      {/* Stats Row */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
+        {[
+          { label:'Total Reads', value:book.total_reads?.toLocaleString() || '0', color:'#5ba4f5', icon:'👁' },
+          { label:'Chapters', value:`${bookStats.published_chapters}/${(chapters as any[]).length}`, color:'#9d7df5', icon:'📄' },
+          { label:'Words', value:(bookStats.total_words as number)?.toLocaleString() || '0', color:'#3dd6a3', icon:'✎' },
+          { label:'Reading Time', value:formatReadingTime(bookStats.total_reading_time || 0), color:'#e8c547', icon:'⏱' },
+          { label:'Price', value:book.is_free ? 'Free' : `$${parseFloat(book.price || 0).toFixed(2)}`, color:'#3dd6a3', icon:'💰' },
+        ].map(stat => (
+          <div key={stat.label} style={{ background:'#151420', border:'1px solid #272635', borderRadius:8, padding:'12px 14px' }}>
+            <div style={{ fontSize:10, color:'#635e80', fontFamily:"'JetBrains Mono',monospace", textTransform:'uppercase', letterSpacing:'0.5px' }}>{stat.label}</div>
+            <div style={{ fontSize:18, fontWeight:800, color:stat.color, marginTop:2 }}>{stat.value}</div>
+          </div>
+        ))}
+      </div>
+
       {/* Review feedback banner */}
       {book.status === 'rejected' && book.review_feedback && (
         <div style={{ background:'rgba(240,112,96,0.08)', border:'1px solid rgba(240,112,96,0.25)', borderRadius:8, padding:'14px 18px' }}>
@@ -94,6 +138,8 @@ export default async function BookDetailPage({ params }: Params) {
           />
           {/* Book file upload */}
           <BookUploadPanel bookId={params.id} bookStatus={book.status} latestFile={latestFile} />
+          {/* Book settings */}
+          <BookSettings book={book} />
         </div>
 
         {/* Chapter list */}
