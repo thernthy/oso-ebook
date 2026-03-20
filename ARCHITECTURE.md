@@ -15,6 +15,7 @@ The OSO E-Book Platform is a multi-role digital publishing system built with **N
 - `app/`: Next.js App Router structure.
   - `(dashboard)/`: Route groups for different user roles.
     - `oso/`: Admin dashboard.
+      - `analytics/`: Platform-wide performance metrics, user growth, and revenue distribution.
     - `partner/`: Partner management dashboard.
     - `author/`: Author content management.
     - `reader/`: User reading and browsing interface.
