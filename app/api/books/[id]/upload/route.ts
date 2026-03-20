@@ -129,9 +129,9 @@ async function processBookAsync(
     const { detectChapters } = await import('@/lib/ai-chapters')
     const result = await detectChapters(parsed.text)
 
-    // Step 3: Delete any existing AI-generated chapters for this book
+    // Step 3: Delete any existing chapters for this book
     await pool.execute(
-      `DELETE FROM chapters WHERE book_id = ? AND source = 'ai'`,
+      `DELETE FROM chapters WHERE book_id = ?`,
       [bookId]
     )
 
@@ -139,9 +139,9 @@ async function processBookAsync(
     for (const ch of result.chapters) {
       await pool.execute(
         `INSERT INTO chapters
-           (book_id, chapter_num, title, content, word_count, is_published, source, ai_confidence)
-         VALUES (?, ?, ?, ?, ?, 0, 'ai', ?)`,
-        [bookId, ch.chapter_num, ch.title, ch.content, ch.word_count, ch.confidence]
+           (book_id, chapter_num, title, content, word_count, is_published)
+         VALUES (?, ?, ?, ?, ?, 0)`,
+        [bookId, ch.chapter_num, ch.title, ch.content, ch.word_count]
       )
     }
 
