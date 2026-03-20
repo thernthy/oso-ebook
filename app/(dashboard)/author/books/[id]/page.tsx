@@ -29,7 +29,7 @@ export default async function BookDetailPage({ params }: Params) {
       [params.id, userId]
     ),
     pool.execute(
-      `SELECT id, chapter_num, title, word_count, is_published, source, ai_confidence, created_at
+      `SELECT id, chapter_num, title, word_count, is_published, created_at
        FROM chapters WHERE book_id = ? ORDER BY chapter_num ASC`,
       [params.id]
     ),

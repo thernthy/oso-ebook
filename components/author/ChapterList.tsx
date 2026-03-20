@@ -8,8 +8,6 @@ interface Chapter {
   title:         string
   word_count:    number
   is_published:  number
-  source:        string
-  ai_confidence: number
 }
 
 interface Props {
@@ -113,7 +111,7 @@ export default function ChapterList({ bookId, chapters: initial, bookStatus }: P
             <div key={ch.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'11px 18px', borderBottom:'1px solid #272635', transition:'background .12s' }}>
 
               {/* Chapter number */}
-              <div style={{ width:28, height:28, borderRadius:5, background: ch.source === 'ai' ? 'rgba(157,125,245,0.15)' : '#1b1a28', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, fontFamily:"'JetBrains Mono',monospace", color: ch.source === 'ai' ? '#9d7df5' : '#635e80', flexShrink:0 }}>
+              <div style={{ width:28, height:28, borderRadius:5, background:'#1b1a28', display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, fontFamily:"'JetBrains Mono',monospace", color:'#635e80', flexShrink:0 }}>
                 {ch.chapter_num}
               </div>
 
@@ -132,7 +130,6 @@ export default function ChapterList({ bookId, chapters: initial, bookStatus }: P
                     <div style={{ fontSize:12, fontWeight:600, color:'#eeecf8' }}>{ch.title}</div>
                     <div style={{ fontSize:10, color:'#635e80', fontFamily:"'JetBrains Mono',monospace", marginTop:1 }}>
                       {ch.word_count.toLocaleString()} words
-                      {ch.source === 'ai' && <span style={{ marginLeft:6, color:'#9d7df5' }}>· AI {Math.round(ch.ai_confidence * 100)}%</span>}
                     </div>
                   </div>
                 )}
