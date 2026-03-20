@@ -45,11 +45,16 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 Since the project uses **NextAuth.js**, you can log in as different roles once users are created in the `users` table.
 
-### Default User Roles:
-1.  **Reader:** General e-book consumers.
-2.  **Author:** Content creators who upload books and manage chapters.
-3.  **Partner:** Business managers who oversee authors and revenue.
-4.  **OSO:** Global administrators with full platform access.
+### Default Test Accounts:
+The following accounts are available after running `npm run db:seed`.
+**All accounts use the password:** `Password@123`
+
+| Role    | Email                | Redirect Dashboard |
+|---------|----------------------|--------------------|
+| **OSO** | `admin@oso.com`      | `/oso`             |
+| **Partner** | `partner@partner.com` | `/partner`         |
+| **Author**  | `author@author.com`   | `/author`          |
+| **Reader**  | `reader@reader.com`   | `/reader`          |
 
 ### How to Test:
 - **Login Route:** `/auth/login`
