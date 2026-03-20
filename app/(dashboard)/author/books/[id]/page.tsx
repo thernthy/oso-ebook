@@ -8,6 +8,7 @@ import ChapterList          from '@/components/author/ChapterList'
 import BookActions          from '@/components/author/BookActions'
 import CoverUpload          from '@/components/author/CoverUpload'
 import BookSettings         from '@/components/author/BookSettings'
+import FileViewer            from '@/components/author/FileViewer'
 
 type Params = { params: { id: string } }
 
@@ -19,8 +20,10 @@ export default async function BookDetailPage({ params }: Params) {
     [books],
     [chapters],
     [files],
-    [stats],
+    [statsRows],
+    [readingStatsRows],
   ] = await Promise.all([
+    // 1. Core book data
     pool.execute(
       `SELECT b.*, p.name AS partner_name
        FROM books b
@@ -28,11 +31,13 @@ export default async function BookDetailPage({ params }: Params) {
        WHERE b.id = ? AND b.author_id = ? LIMIT 1`,
       [params.id, userId]
     ),
+    // 2. Chapters list
     pool.execute(
       `SELECT id, chapter_num, title, word_count, is_published, created_at
        FROM chapters WHERE book_id = ? ORDER BY chapter_num ASC`,
       [params.id]
     ),
+    // 3. Latest file/AI job
     pool.execute(
       `SELECT bf.id, bf.format, bf.original_name, bf.file_size, bf.status AS file_status,
               aj.id AS job_id, aj.status AS ai_status, aj.chapters_found,
@@ -43,13 +48,18 @@ export default async function BookDetailPage({ params }: Params) {
        ORDER BY bf.uploaded_at DESC LIMIT 1`,
       [params.id]
     ),
+    // 4. Chapter stats
     pool.execute(
       `SELECT 
-         COUNT(CASE WHEN is_published = 1 THEN 1 END) AS published_chapters,
-         COALESCE(SUM(word_count), 0) AS total_words,
-         (SELECT COUNT(*) FROM reading_progress WHERE book_id = ?) AS total_reading_sessions
+         SUM(CASE WHEN is_published = 1 THEN 1 ELSE 0 END) AS published_chapters,
+         COALESCE(SUM(word_count), 0) AS total_words
        FROM chapters WHERE book_id = ?`,
-      [params.id, params.id]
+      [params.id]
+    ),
+    // 5. Reading stats
+    pool.execute(
+      `SELECT COUNT(*) AS total_reading_sessions FROM reading_progress WHERE book_id = ?`,
+      [params.id]
     ),
   ]) as any[]
 
@@ -57,7 +67,14 @@ export default async function BookDetailPage({ params }: Params) {
   if (!book) notFound()
 
   const latestFile = (files as any[])[0] || null
-  const bookStats = (stats as any[])[0] || {}
+  const chStats = (statsRows as any[])[0] || {}
+  const rStats = (readingStatsRows as any[])[0] || {}
+
+  const bookStats = {
+    published_chapters: chStats.published_chapters || 0,
+    total_words: chStats.total_words || 0,
+    total_reading_sessions: rStats.total_reading_sessions || 0,
+  }
 
   const statusColors: Record<string, string> = {
     published: '#3dd6a3', in_review: '#9d7df5', draft: '#6b6b78', rejected: '#f07060',
@@ -138,6 +155,8 @@ export default async function BookDetailPage({ params }: Params) {
           />
           {/* Book file upload */}
           <BookUploadPanel bookId={params.id} bookStatus={book.status} latestFile={latestFile} />
+          {/* File viewer for PDF */}
+          <FileViewer bookId={params.id} />
           {/* Book settings */}
           <BookSettings book={book} />
         </div>
