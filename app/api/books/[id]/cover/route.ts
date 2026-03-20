@@ -79,9 +79,8 @@ export async function POST(req: NextRequest, { params }: Params) {
     )
 
     // Derive public URLs
-    const baseUrl    = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const coverUrl   = `${baseUrl}/uploads/${fullResult.storageKey}`
-    const thumbUrl   = `${baseUrl}/uploads/${thumbResult.storageKey}`
+    const coverUrl   = `/uploads/${fullResult.storageKey}`
+    const thumbUrl   = `/uploads/${thumbResult.storageKey}`
 
     // Save to DB
     await pool.execute(

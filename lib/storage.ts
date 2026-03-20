@@ -52,10 +52,10 @@ async function uploadToLocal(
 ): Promise<UploadResult> {
   const baseDir    = settings['storage_local_dir'] || 'uploads/books'
   const uploadDir  = path.join(process.cwd(), baseDir, subDir)
-  const storageKey = path.join(subDir, safeName)
+  const storageKey = path.posix.join(subDir, safeName).replace(/\\/g, '/')
 
   await fs.mkdir(uploadDir, { recursive: true })
-  await fs.writeFile(path.join(process.cwd(), baseDir, storageKey), file.buffer)
+  await fs.writeFile(path.join(uploadDir, safeName), file.buffer)
 
   return { storageKey, provider: 'local' }
 }
@@ -146,5 +146,6 @@ export async function readFile(storageKey: string): Promise<Buffer> {
   }
 
   const baseDir = settings['storage_local_dir'] || 'uploads/books'
-  return fs.readFile(path.join(process.cwd(), baseDir, storageKey))
+  const normalizedKey = storageKey.replace(/\\/g, '/')
+  return fs.readFile(path.join(process.cwd(), baseDir, ...normalizedKey.split('/')))
 }
