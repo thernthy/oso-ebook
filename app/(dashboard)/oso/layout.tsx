@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
 import { redirect }         from 'next/navigation'
 import Link                 from 'next/link'
+import AccountPopup         from '@/components/ui/AccountPopup'
 
 const nav = [
   { section: 'Overview' },
@@ -62,15 +63,7 @@ export default async function OsoLayout({ children }: { children: React.ReactNod
 
         {/* Profile */}
         <div style={{ padding:'16px 20px', borderTop:'1px solid #2a2a32' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <div style={{ width:32, height:32, borderRadius:'50%', background:'linear-gradient(135deg,#e8c547,#9d7df5)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, fontWeight:700, color:'#0c0c0e', flexShrink:0 }}>
-              {user.name?.slice(0,2).toUpperCase()}
-            </div>
-            <div>
-              <div style={{ fontSize:13, fontWeight:600, color:'#f0efe8' }}>{user.name}</div>
-              <div style={{ fontSize:10, color:'#e8c547', fontFamily:"'JetBrains Mono',monospace" }}>OSO · root</div>
-            </div>
-          </div>
+          <AccountPopup user={user} />
         </div>
       </aside>
 
