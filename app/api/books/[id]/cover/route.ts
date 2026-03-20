@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         mimeType:     'image/jpeg',
         size:         processed.fullBuffer.length,
       },
-      `covers/${params.id}`
+      `books/covers/${params.id}`
     )
 
     // Upload thumbnail
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         mimeType:     'image/jpeg',
         size:         processed.thumbBuffer.length,
       },
-      `covers/${params.id}/thumbs`
+      `books/covers/${params.id}`
     )
 
     // Derive public URLs
