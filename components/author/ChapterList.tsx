@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface Chapter {
   id:            string
@@ -17,14 +18,61 @@ interface Props {
 }
 
 export default function ChapterList({ bookId, chapters: initial, bookStatus }: Props) {
+  const router = useRouter()
   const [chapters,  setChapters]  = useState<Chapter[]>(initial)
   const [arranging, setArranging] = useState(false)
+  const [splitting, setSplitting] = useState(false)
   const [editing,   setEditing]   = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [saving,    setSaving]    = useState(false)
   const [msg,       setMsg]       = useState('')
+  const [preview,   setPreview]   = useState<any>(null)
+  const [showPreview, setShowPreview] = useState(false)
 
-  const canEdit = ['draft', 'rejected', 'in_review'].includes(bookStatus)
+  const canEdit = ['draft', 'rejected'].includes(bookStatus)
+
+  async function previewSplit() {
+    setMsg('')
+    try {
+      const res = await fetch(`/api/books/${bookId}/chapters/split`)
+      const data = await res.json()
+      if (res.ok) {
+        setPreview(data.data)
+        setShowPreview(true)
+      } else {
+        setMsg(`⚠ ${data.error}`)
+      }
+    } catch (e) {
+      setMsg('⚠ Failed to preview chapters')
+    }
+  }
+
+  async function splitChapters() {
+    if (!confirm('This will replace all existing chapters. Continue?')) return
+    
+    setSplitting(true)
+    setMsg('')
+    try {
+      const res = await fetch(`/api/books/${bookId}/chapters/split`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const data = await res.json()
+      
+      if (res.ok) {
+        setMsg(`✓ ${data.data.message}`)
+        setShowPreview(false)
+        setPreview(null)
+        router.refresh()
+      } else {
+        setMsg(`⚠ ${data.error}`)
+      }
+    } catch (e) {
+      setMsg('⚠ Failed to split chapters')
+    } finally {
+      setSplitting(false)
+    }
+  }
 
   async function aiArrange() {
     setArranging(true)
@@ -38,10 +86,7 @@ export default function ChapterList({ bookId, chapters: initial, bookStatus }: P
     setArranging(false)
     if (res.ok) {
       setMsg('✓ AI has rearranged your chapters')
-      // Re-fetch chapters
-      const r2   = await fetch(`/api/books/${bookId}/chapters`)
-      const d2   = await r2.json()
-      if (d2.data?.chapters) setChapters(d2.data.chapters)
+      router.refresh()
     } else {
       setMsg(`⚠ ${data.error}`)
     }
@@ -86,12 +131,20 @@ export default function ChapterList({ bookId, chapters: initial, bookStatus }: P
         <div style={{ fontSize:13, fontWeight:700, color:'#eeecf8' }}>
           Chapters <span style={{ fontSize:11, color:'#635e80', fontFamily:"'JetBrains Mono',monospace", marginLeft:6 }}>{chapters.length} total</span>
         </div>
-        {canEdit && chapters.length > 1 && (
-          <button onClick={aiArrange} disabled={arranging}
-            style={{ padding:'5px 12px', borderRadius:5, background:'rgba(157,125,245,0.15)', border:'1px solid rgba(157,125,245,0.3)', color:'#9d7df5', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:"'JetBrains Mono',monospace", opacity:arranging?0.6:1 }}>
-            {arranging ? '⟳ AI arranging…' : '✦ AI Auto-Arrange'}
-          </button>
-        )}
+        <div style={{ display:'flex', gap:8 }}>
+          {canEdit && (
+            <button onClick={previewSplit}
+              style={{ padding:'5px 12px', borderRadius:5, background:'rgba(232,197,71,0.12)', border:'1px solid rgba(232,197,71,0.3)', color:'#e8c547', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:"'JetBrains Mono',monospace" }}>
+              ✂ Split Chapters
+            </button>
+          )}
+          {canEdit && chapters.length > 1 && (
+            <button onClick={aiArrange} disabled={arranging}
+              style={{ padding:'5px 12px', borderRadius:5, background:'rgba(157,125,245,0.15)', border:'1px solid rgba(157,125,245,0.3)', color:'#9d7df5', fontSize:11, fontWeight:600, cursor:'pointer', fontFamily:"'JetBrains Mono',monospace", opacity:arranging?0.6:1 }}>
+              {arranging ? '⟳ AI arranging…' : '✦ Reorder'}
+            </button>
+          )}
+        </div>
       </div>
 
       {msg && (
@@ -100,10 +153,44 @@ export default function ChapterList({ bookId, chapters: initial, bookStatus }: P
         </div>
       )}
 
+      {/* Preview Modal */}
+      {showPreview && preview && (
+        <div style={{ padding:16, borderBottom:'1px solid #272635', background:'rgba(232,197,71,0.05)' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+            <div style={{ fontSize:12, fontWeight:700, color:'#e8c547' }}>Preview: {preview.estimated_chapters} chapters detected</div>
+            <button onClick={() => { setShowPreview(false); setPreview(null) }}
+              style={{ padding:'4px 8px', borderRadius:4, background:'transparent', border:'1px solid #272635', color:'#635e80', cursor:'pointer', fontSize:12 }}>
+              ✕
+            </button>
+          </div>
+          <div style={{ fontSize:11, color:'#635e80', marginBottom:8 }}>
+            Total words: {preview.total_words?.toLocaleString()} | {preview.summary}
+          </div>
+          <div style={{ maxHeight:200, overflowY:'auto', marginBottom:12 }}>
+            {preview.preview?.map((ch: any, i: number) => (
+              <div key={i} style={{ display:'flex', gap:12, padding:'6px 0', borderBottom:'1px solid #272635' }}>
+                <span style={{ fontSize:10, color:'#9d7df5', fontFamily:"'JetBrains Mono',monospace", width:30 }}>Ch.{ch.chapter_num}</span>
+                <span style={{ fontSize:11, color:'#eeecf8', flex:1 }}>{ch.title}</span>
+                <span style={{ fontSize:10, color:'#635e80', fontFamily:"'JetBrains Mono',monospace" }}>{ch.word_count?.toLocaleString()} words</span>
+              </div>
+            ))}
+          </div>
+          {preview.warnings?.length > 0 && (
+            <div style={{ fontSize:10, color:'#e8c547', marginBottom:8 }}>
+              ⚠ {preview.warnings.join(', ')}
+            </div>
+          )}
+          <button onClick={splitChapters} disabled={splitting}
+            style={{ padding:'8px 16px', borderRadius:6, background:'#e8c547', border:'none', color:'#0c0c10', fontSize:12, fontWeight:700, cursor:'pointer' }}>
+            {splitting ? '⟳ Splitting...' : '✓ Apply Split'}
+          </button>
+        </div>
+      )}
+
       {chapters.length === 0 ? (
         <div style={{ padding:'32px', textAlign:'center', color:'#635e80' }}>
           <div style={{ fontSize:24, marginBottom:8 }}>📄</div>
-          <div style={{ fontSize:13 }}>No chapters yet. Upload a book file to auto-detect chapters.</div>
+          <div style={{ fontSize:13 }}>No chapters yet. Upload a book file, then click &quot;Split Chapters&quot; to detect chapters.</div>
         </div>
       ) : (
         <div style={{ maxHeight:520, overflowY:'auto' }}>
