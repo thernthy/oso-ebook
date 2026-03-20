@@ -47,7 +47,7 @@ export default async function BookDetailPage({ params }: Params) {
       `SELECT 
          COUNT(CASE WHEN is_published = 1 THEN 1 END) AS published_chapters,
          COALESCE(SUM(word_count), 0) AS total_words,
-         COALESCE((SELECT SUM(rp.reading_time_seconds) FROM reading_progress rp JOIN users u ON rp.user_id = u.id WHERE rp.book_id = ?), 0) AS total_reading_time
+         (SELECT COUNT(*) FROM reading_progress WHERE book_id = ?) AS total_reading_sessions
        FROM chapters WHERE book_id = ?`,
       [params.id, params.id]
     ),
@@ -64,10 +64,10 @@ export default async function BookDetailPage({ params }: Params) {
   }
   const statusColor = statusColors[book.status] || '#6b6b78'
 
-  const formatReadingTime = (seconds: number) => {
-    if (seconds < 60) return `${seconds}s`
-    if (seconds < 3600) return `${Math.round(seconds/60)}m`
-    return `${Math.round(seconds/3600)}h ${Math.round((seconds%3600)/60)}m`
+  const formatSessions = (count: number) => {
+    if (count === 0) return '—'
+    if (count === 1) return '1 session'
+    return `${count.toLocaleString()} sessions`
   }
 
   return (
@@ -109,7 +109,7 @@ export default async function BookDetailPage({ params }: Params) {
           { label:'Total Reads', value:book.total_reads?.toLocaleString() || '0', color:'#5ba4f5', icon:'👁' },
           { label:'Chapters', value:`${bookStats.published_chapters}/${(chapters as any[]).length}`, color:'#9d7df5', icon:'📄' },
           { label:'Words', value:(bookStats.total_words as number)?.toLocaleString() || '0', color:'#3dd6a3', icon:'✎' },
-          { label:'Reading Time', value:formatReadingTime(bookStats.total_reading_time || 0), color:'#e8c547', icon:'⏱' },
+          { label:'Readers', value:formatSessions(bookStats.total_reading_sessions || 0), color:'#e8c547', icon:'👤' },
           { label:'Price', value:book.is_free ? 'Free' : `$${parseFloat(book.price || 0).toFixed(2)}`, color:'#3dd6a3', icon:'💰' },
         ].map(stat => (
           <div key={stat.label} style={{ background:'#151420', border:'1px solid #272635', borderRadius:8, padding:'12px 14px' }}>
