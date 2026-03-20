@@ -19,13 +19,14 @@ export default async function OsoAnalytics() {
     // User growth (last 6 months)
     pool.execute(`
       SELECT DATE_FORMAT(created_at, '%b') AS month,
+             DATE_FORMAT(created_at, '%Y-%m') AS month_key,
              COUNT(*) AS total,
-             SUM(role='reader') AS readers,
-             SUM(role='author') AS authors
+             SUM(CASE WHEN role = 'reader' THEN 1 ELSE 0 END) AS readers,
+             SUM(CASE WHEN role = 'author' THEN 1 ELSE 0 END) AS authors
       FROM users
       WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-      GROUP BY DATE_FORMAT(created_at, '%Y-%m')
-      ORDER BY MIN(created_at) ASC
+      GROUP BY DATE_FORMAT(created_at, '%Y-%m'), DATE_FORMAT(created_at, '%b')
+      ORDER BY month_key ASC
     `),
     // Revenue split summary
     pool.execute(`
@@ -54,7 +55,7 @@ export default async function OsoAnalytics() {
       FROM users u
       LEFT JOIN users a ON a.partner_id = u.id AND a.role = 'author'
       WHERE u.role = 'partner'
-      GROUP BY u.id
+      GROUP BY u.id, u.name
       ORDER BY author_count DESC
       LIMIT 5
     `),
