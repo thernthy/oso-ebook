@@ -24,7 +24,7 @@ The OSO E-Book Platform is a multi-role digital publishing system built with **N
   - `ui/`: Generic UI elements.
   - `[role]/`: Role-specific components.
 - `lib/`: Utility libraries.
-  - `db.ts`: Database connection pool.
+  - `db.ts`: Database connection pool. Implements a **singleton pattern** for development to prevent "Too many connections" errors during hot-reloads.
   - `permissions.ts`: Role-based access control logic.
 - `database/`: SQL migration files.
 
