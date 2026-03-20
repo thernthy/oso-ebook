@@ -27,10 +27,10 @@ export default async function AuthorLayout({ children }: { children: React.React
 
         <nav style={{ flex:1, padding:'12px 0', overflowY:'auto' }}>
           {[
-            { label:'Overview',   href:'/dashboard/author',          icon:'⬡' },
-            { label:'My Books',   href:'/dashboard/author/books',     icon:'▭' },
-            { label:'New Book',   href:'/dashboard/author/books/new', icon:'+' },
-            { label:'Earnings',   href:'/dashboard/author/revenue',   icon:'◈' },
+            { label:'Overview',   href:'/author',          icon:'⬡' },
+            { label:'My Books',   href:'/author/books',     icon:'▭' },
+            { label:'New Book',   href:'/author/books/new', icon:'+' },
+            { label:'Earnings',   href:'/author/revenue',   icon:'◈' },
           ].map(item => (
             <NavItem key={item.href} {...item} />
           ))}

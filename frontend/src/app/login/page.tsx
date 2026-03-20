@@ -23,7 +23,7 @@ export default function LoginPage() {
 
     if (res.success) {
       const role = res.data?.user.role;
-      const redirectPath = role === 'oso_admin' ? '/dashboard/oso' : `/dashboard/${role}`;
+      const redirectPath = role === 'oso_admin' ? '/oso' : `/${role}`;
       router.push(redirectPath);
     } else {
       setError(res.error || 'Login failed');

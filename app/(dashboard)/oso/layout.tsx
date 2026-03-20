@@ -5,18 +5,18 @@ import Link                 from 'next/link'
 
 const nav = [
   { section: 'Overview' },
-  { label: 'Command Center', href: '/dashboard/oso',          icon: '⬡' },
-  { label: 'Analytics',      href: '/dashboard/oso/analytics', icon: '◈' },
+  { label: 'Command Center', href: '/oso',          icon: '⬡' },
+  { label: 'Analytics',      href: '/oso/analytics', icon: '◈' },
   { section: 'Management' },
-  { label: 'All Users',      href: '/dashboard/oso/users',    icon: '◎' },
-  { label: 'Partners',       href: '/dashboard/oso/partners', icon: '◇' },
-  { label: 'Books Catalog',  href: '/dashboard/oso/books',    icon: '▭' },
+  { label: 'All Users',      href: '/oso/users',    icon: '◎' },
+  { label: 'Partners',       href: '/oso/partners', icon: '◇' },
+  { label: 'Books Catalog',  href: '/oso/books',    icon: '▭' },
   { section: 'Finance' },
-  { label: 'Revenue',        href: '/dashboard/oso/revenue',  icon: '◈' },
-  { label: 'Payouts',        href: '/dashboard/oso/payouts',  icon: '◁' },
+  { label: 'Revenue',        href: '/oso/revenue',  icon: '◈' },
+  { label: 'Payouts',        href: '/oso/payouts',  icon: '◁' },
   { section: 'System' },
-  { label: 'Platform Settings', href: '/dashboard/oso/settings', icon: '⊙' },
-  { label: 'Storage Config', href: '/dashboard/oso/settings#storage', icon: '◫' },
+  { label: 'Platform Settings', href: '/oso/settings', icon: '⊙' },
+  { label: 'Storage Config', href: '/oso/settings#storage', icon: '◫' },
 ]
 
 export default async function OsoLayout({ children }: { children: React.ReactNode }) {

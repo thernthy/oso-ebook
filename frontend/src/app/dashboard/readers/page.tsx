@@ -52,7 +52,7 @@ export default function ReaderDashboard() {
       <div className="bg-white rounded-xl border shadow-sm">
         <div className="p-6 border-b flex items-center justify-between">
           <h2 className="text-lg font-semibold">Continue Reading</h2>
-          <Link href="/dashboard/readers/library" className="text-slate-600 hover:text-slate-900">My Library →</Link>
+          <Link href="/readers/library" className="text-slate-600 hover:text-slate-900">My Library →</Link>
         </div>
         <div className="divide-y">
           {stats?.currentReads?.map((progress: ReadingProgress) => (

@@ -23,10 +23,10 @@ export default async function ReaderLayout({ children }: { children: React.React
         </div>
         <nav style={{ flex:1, padding:'12px 0', overflowY:'auto' }}>
           {[
-            { label:'My Library',      href:'/dashboard/reader',          icon:'⬡' },
-            { label:'Continue Reading',href:'/dashboard/reader/library',  icon:'▷' },
-            { label:'Browse Books',    href:'/dashboard/reader/browse',   icon:'▭' },
-            { label:'Bookmarks',       href:'/dashboard/reader/bookmarks',icon:'★' },
+            { label:'My Library',      href:'/reader',          icon:'⬡' },
+            { label:'Continue Reading',href:'/reader/library',  icon:'▷' },
+            { label:'Browse Books',    href:'/reader/browse',   icon:'▭' },
+            { label:'Bookmarks',       href:'/reader/bookmarks',icon:'★' },
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 20px', color:'#5a5e80', fontSize:13, fontWeight:500, textDecoration:'none', borderLeft:'2px solid transparent' }}>

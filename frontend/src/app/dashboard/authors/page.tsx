@@ -31,7 +31,7 @@ export default function AuthorDashboard() {
           <p className="text-slate-600">Manage your books and track performance</p>
         </div>
         <Link
-          href="/dashboard/authors/books/new"
+          href="/authors/books/new"
           className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800"
         >
           <Plus size={20} />
@@ -62,7 +62,7 @@ export default function AuthorDashboard() {
       <div className="bg-white rounded-xl border shadow-sm">
         <div className="p-6 border-b flex items-center justify-between">
           <h2 className="text-lg font-semibold">My Books</h2>
-          <Link href="/dashboard/authors/books" className="text-slate-600 hover:text-slate-900">View all →</Link>
+          <Link href="/authors/books" className="text-slate-600 hover:text-slate-900">View all →</Link>
         </div>
         <div className="divide-y">
           {stats?.recentBooks?.map((book: Book) => (

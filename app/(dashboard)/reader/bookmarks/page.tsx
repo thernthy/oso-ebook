@@ -50,7 +50,7 @@ export default async function BookmarksPage() {
                 <div style={{ fontSize:13, fontWeight:700, color:'#e8eaf8' }}>{book.title}</div>
                 <div style={{ fontSize:11, color:'#5a5e80', fontFamily:"'JetBrains Mono',monospace" }}>{book.author}</div>
               </div>
-              <Link href={`/dashboard/reader/read/${bookId}`}
+              <Link href={`/reader/read/${bookId}`}
                 style={{ fontSize:11, color:'#5ba4f5', fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>
                 Continue →
               </Link>
@@ -69,7 +69,7 @@ export default async function BookmarksPage() {
                     {new Date(bm.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
                   </div>
                 </div>
-                <Link href={`/dashboard/reader/read/${bookId}`}
+                <Link href={`/reader/read/${bookId}`}
                   style={{ padding:'4px 10px', borderRadius:4, background:'rgba(91,164,245,0.1)', border:'1px solid rgba(91,164,245,0.2)', color:'#5ba4f5', fontSize:11, fontFamily:"'JetBrains Mono',monospace", textDecoration:'none', flexShrink:0 }}>
                   Jump →
                 </Link>

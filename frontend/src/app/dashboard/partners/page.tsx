@@ -31,7 +31,7 @@ export default function PartnerDashboard() {
           <p className="text-slate-600">Manage your authors and content</p>
         </div>
         <Link
-          href="/dashboard/partners/authors/new"
+          href="/partners/authors/new"
           className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800"
         >
           <Plus size={20} />
@@ -78,7 +78,7 @@ export default function PartnerDashboard() {
       <div className="bg-white rounded-xl border shadow-sm">
         <div className="p-6 border-b flex items-center justify-between">
           <h2 className="text-lg font-semibold">My Authors</h2>
-          <Link href="/dashboard/partners/authors" className="text-slate-600 hover:text-slate-900">View all →</Link>
+          <Link href="/partners/authors" className="text-slate-600 hover:text-slate-900">View all →</Link>
         </div>
         <div className="divide-y">
           {stats?.recentAuthors?.map((author) => (

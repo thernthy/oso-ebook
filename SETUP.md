@@ -72,10 +72,10 @@ Open [http://localhost:3000](http://localhost:3000) — you will be redirected t
 4. On success, NextAuth creates a **JWT token** containing `id`, `role`, `status`, `partner_id`
 5. The JWT is stored in a secure HTTP-only cookie
 6. `middleware.ts` reads the JWT on every request and redirects to the correct dashboard based on role:
-   - `oso` → `/dashboard/oso`
-   - `partner` → `/dashboard/partner`
-   - `author` → `/dashboard/author`
-   - `reader` → `/dashboard/reader`
+   - `oso` → `/oso`
+   - `partner` → `/partner`
+   - `author` → `/author`
+   - `reader` → `/reader`
 
 ---
 

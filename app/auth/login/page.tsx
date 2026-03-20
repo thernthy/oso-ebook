@@ -40,12 +40,12 @@ export default function LoginPage() {
       const res  = await fetch('/api/auth/session')
       const data = await res.json()
       const roleRoutes: Record<string, string> = {
-        oso:     '/dashboard/oso',
-        partner: '/dashboard/partner',
-        author:  '/dashboard/author',
-        reader:  '/dashboard/reader',
+        oso:     '/oso',
+        partner: '/partner',
+        author:  '/author',
+        reader:  '/reader',
       }
-      router.push(roleRoutes[data?.user?.role] ?? '/dashboard/reader')
+      router.push(roleRoutes[data?.user?.role] ?? '/reader')
     }
   }
 

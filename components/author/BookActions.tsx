@@ -39,7 +39,7 @@ export default function BookActions({ book, chapterCount }: Props) {
     setLoading(true)
     const res = await fetch(`/api/books/${book.id}`, { method: 'DELETE' })
     setLoading(false)
-    if (res.ok) router.push('/dashboard/author/books')
+    if (res.ok) router.push('/author/books')
     else {
       const d = await res.json()
       setMsg(`⚠ ${d.error}`)

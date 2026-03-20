@@ -47,7 +47,7 @@ export default function NewBookPage() {
     }
 
     // Redirect to the book page to upload file
-    router.push(`/dashboard/author/books/${data.data.id}`)
+    router.push(`/author/books/${data.data.id}`)
   }
 
   return (

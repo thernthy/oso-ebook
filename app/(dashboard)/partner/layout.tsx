@@ -24,11 +24,11 @@ export default async function PartnerLayout({ children }: { children: React.Reac
         </div>
         <nav style={{ flex:1, padding:'12px 0', overflowY:'auto' }}>
           {[
-            { label:'Dashboard',     href:'/dashboard/partner',              icon:'⬡' },
-            { label:'Review Queue',  href:'/dashboard/partner/books',        icon:'⏳' },
-            { label:'My Authors',    href:'/dashboard/partner/authors',      icon:'△'  },
-            { label:'Revenue',       href:'/dashboard/partner/revenue',      icon:'◈'  },
-            { label:'Invite Author', href:`/dashboard/partner/authors/invite`, icon:'+' },
+            { label:'Dashboard',     href:'/partner',              icon:'⬡' },
+            { label:'Review Queue',  href:'/partner/books',        icon:'⏳' },
+            { label:'My Authors',    href:'/partner/authors',      icon:'△'  },
+            { label:'Revenue',       href:'/partner/revenue',      icon:'◈'  },
+            { label:'Invite Author', href:`/partner/authors/invite`, icon:'+' },
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 20px', color:'#5e6b70', fontSize:13, fontWeight:500, textDecoration:'none', borderLeft:'2px solid transparent' }}>

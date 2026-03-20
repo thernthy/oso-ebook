@@ -21,7 +21,7 @@ export default async function ReadPage({ params }: Params) {
   ) as any[]
 
   const book = (access as any[])[0]
-  if (!book) redirect(`/dashboard/reader/books/${params.bookId}`)
+  if (!book) redirect(`/reader/books/${params.bookId}`)
 
   // Fetch all published chapters with content
   const [chapters] = await pool.execute(

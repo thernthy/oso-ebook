@@ -51,7 +51,7 @@ export default async function AuthorBooksPage() {
             {total} books total
           </div>
         </div>
-        <Link href="/dashboard/author/books/new"
+        <Link href="/author/books/new"
           style={{ padding:'8px 18px', borderRadius:6, background:'#9d7df5', color:'#0d0c10', fontSize:13, fontWeight:700, textDecoration:'none', fontFamily:"'Syne',system-ui,sans-serif" }}>
           + New Book
         </Link>
@@ -83,7 +83,7 @@ export default async function AuthorBooksPage() {
             <div style={{ fontSize:32, marginBottom:12 }}>📚</div>
             <div style={{ fontSize:14, fontWeight:600, marginBottom:6 }}>No books yet</div>
             <div style={{ fontSize:12, fontFamily:"'JetBrains Mono',monospace" }}>Upload your first book to get started</div>
-            <Link href="/dashboard/author/books/new" style={{ display:'inline-block', marginTop:16, padding:'8px 18px', borderRadius:6, background:'#9d7df5', color:'#0d0c10', fontSize:13, fontWeight:700, textDecoration:'none' }}>
+            <Link href="/author/books/new" style={{ display:'inline-block', marginTop:16, padding:'8px 18px', borderRadius:6, background:'#9d7df5', color:'#0d0c10', fontSize:13, fontWeight:700, textDecoration:'none' }}>
               + New Book
             </Link>
           </div>
@@ -138,7 +138,7 @@ export default async function AuthorBooksPage() {
                       )}
                     </td>
                     <td style={{ padding:'12px 18px' }}>
-                      <Link href={`/dashboard/author/books/${book.id}`}
+                      <Link href={`/author/books/${book.id}`}
                         style={{ padding:'4px 10px', borderRadius:4, border:'1px solid #2e3252', background:'transparent', color:'#635e80', fontSize:11, fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>
                         Manage →
                       </Link>

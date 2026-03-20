@@ -28,25 +28,25 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard/oso', icon: LayoutDashboard, roles: ['oso_admin'] },
-  { label: 'Users', href: '/dashboard/oso/users', icon: Users, roles: ['oso_admin'] },
-  { label: 'Partners', href: '/dashboard/oso/partners', icon: Building2, roles: ['oso_admin'] },
-  { label: 'Books', href: '/dashboard/oso/books', icon: BookOpen, roles: ['oso_admin'] },
+  { label: 'Dashboard', href: '/oso', icon: LayoutDashboard, roles: ['oso_admin'] },
+  { label: 'Users', href: '/oso/users', icon: Users, roles: ['oso_admin'] },
+  { label: 'Partners', href: '/oso/partners', icon: Building2, roles: ['oso_admin'] },
+  { label: 'Books', href: '/oso/books', icon: BookOpen, roles: ['oso_admin'] },
   
-  { label: 'Dashboard', href: '/dashboard/partners', icon: LayoutDashboard, roles: ['partner'] },
-  { label: 'My Authors', href: '/dashboard/partners/authors', icon: Users, roles: ['partner'] },
-  { label: 'Books', href: '/dashboard/partners/books', icon: BookOpen, roles: ['partner'] },
-  { label: 'Earnings', href: '/dashboard/partners/earnings', icon: BookMarked, roles: ['partner'] },
+  { label: 'Dashboard', href: '/partners', icon: LayoutDashboard, roles: ['partner'] },
+  { label: 'My Authors', href: '/partners/authors', icon: Users, roles: ['partner'] },
+  { label: 'Books', href: '/partners/books', icon: BookOpen, roles: ['partner'] },
+  { label: 'Earnings', href: '/partners/earnings', icon: BookMarked, roles: ['partner'] },
   
-  { label: 'Dashboard', href: '/dashboard/authors', icon: LayoutDashboard, roles: ['author'] },
-  { label: 'My Books', href: '/dashboard/authors/books', icon: BookOpen, roles: ['author'] },
-  { label: 'New Book', href: '/dashboard/authors/books/new', icon: PenTool, roles: ['author'] },
-  { label: 'Stats', href: '/dashboard/authors/stats', icon: BookMarked, roles: ['author'] },
+  { label: 'Dashboard', href: '/authors', icon: LayoutDashboard, roles: ['author'] },
+  { label: 'My Books', href: '/authors/books', icon: BookOpen, roles: ['author'] },
+  { label: 'New Book', href: '/authors/books/new', icon: PenTool, roles: ['author'] },
+  { label: 'Stats', href: '/authors/stats', icon: BookMarked, roles: ['author'] },
   
-  { label: 'Dashboard', href: '/dashboard/readers', icon: LayoutDashboard, roles: ['reader'] },
-  { label: 'Library', href: '/dashboard/readers/library', icon: Library, roles: ['reader'] },
-  { label: 'Bookmarks', href: '/dashboard/readers/bookmarks', icon: BookMarked, roles: ['reader'] },
-  { label: 'Following', href: '/dashboard/readers/following', icon: Users, roles: ['reader'] },
+  { label: 'Dashboard', href: '/readers', icon: LayoutDashboard, roles: ['reader'] },
+  { label: 'Library', href: '/readers/library', icon: Library, roles: ['reader'] },
+  { label: 'Bookmarks', href: '/readers/bookmarks', icon: BookMarked, roles: ['reader'] },
+  { label: 'Following', href: '/readers/following', icon: Users, roles: ['reader'] },
 ];
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
@@ -70,7 +70,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         const currentRole = pathname.split('/')[2];
         if (currentRole !== res.data.role.replace('_', '-')) {
           const rolePath = res.data.role === 'oso_admin' ? 'oso' : res.data.role;
-          router.push(`/dashboard/${rolePath}`);
+          router.push(`/${rolePath}`);
         }
       } else {
         api.clearToken();

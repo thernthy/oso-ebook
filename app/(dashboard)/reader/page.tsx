@@ -63,7 +63,7 @@ export default async function ReaderHomePage() {
             Welcome back, {session!.user.name?.split(' ')[0]}
           </div>
         </div>
-        <Link href="/dashboard/reader/browse" style={{ padding:'8px 18px', borderRadius:6, background:'#5ba4f5', color:'#0c0d10', fontSize:12, fontWeight:700, textDecoration:'none' }}>
+        <Link href="/reader/browse" style={{ padding:'8px 18px', borderRadius:6, background:'#5ba4f5', color:'#0c0d10', fontSize:12, fontWeight:700, textDecoration:'none' }}>
           Browse Books
         </Link>
       </div>
@@ -100,7 +100,7 @@ export default async function ReaderHomePage() {
                 </div>
                 <div style={{ fontSize:10, color:'#5a5e80', fontFamily:"'JetBrains Mono',monospace", marginTop:3 }}>{b.scroll_pct}% complete</div>
               </div>
-              <Link href={`/dashboard/reader/read/${b.id}`}
+              <Link href={`/reader/read/${b.id}`}
                 style={{ padding:'8px 18px', borderRadius:6, background:'#5ba4f5', color:'#0c0d10', fontSize:12, fontWeight:700, textDecoration:'none', flexShrink:0 }}>
                 Read →
               </Link>
@@ -113,13 +113,13 @@ export default async function ReaderHomePage() {
       <div style={{ background:'#131520', border:'1px solid #252840', borderRadius:10, overflow:'hidden' }}>
         <div style={{ padding:'14px 18px', borderBottom:'1px solid #252840', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <div style={{ fontSize:13, fontWeight:700, color:'#e8eaf8' }}>All Books</div>
-          <Link href="/dashboard/reader/library" style={{ fontSize:11, color:'#5ba4f5', fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>View all →</Link>
+          <Link href="/reader/library" style={{ fontSize:11, color:'#5ba4f5', fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>View all →</Link>
         </div>
         {(recentBooks as any[]).length === 0 ? (
           <div style={{ padding:'40px', textAlign:'center', color:'#5a5e80' }}>
             <div style={{ fontSize:28, marginBottom:10 }}>📚</div>
             <div style={{ fontSize:13, marginBottom:6 }}>No books yet</div>
-            <Link href="/dashboard/reader/browse" style={{ fontSize:12, color:'#5ba4f5', fontFamily:"'JetBrains Mono',monospace" }}>Browse the catalog →</Link>
+            <Link href="/reader/browse" style={{ fontSize:12, color:'#5ba4f5', fontFamily:"'JetBrains Mono',monospace" }}>Browse the catalog →</Link>
           </div>
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:14, padding:16 }}>
@@ -134,7 +134,7 @@ export default async function ReaderHomePage() {
                   </div>
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                     <span style={{ fontSize:10, color:'#5a5e80', fontFamily:"'JetBrains Mono',monospace" }}>{b.progress}%</span>
-                    <Link href={`/dashboard/reader/read/${b.id}`}
+                    <Link href={`/reader/read/${b.id}`}
                       style={{ fontSize:11, fontWeight:700, color:'#5ba4f5', textDecoration:'none', fontFamily:"'JetBrains Mono',monospace" }}>
                       {b.progress > 0 ? 'Continue →' : 'Start →'}
                     </Link>

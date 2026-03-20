@@ -43,10 +43,10 @@ export function can(role: Role, permission: string): boolean {
  */
 export function dashboardRoute(role: Role): string {
   const routes: Record<Role, string> = {
-    oso:     '/dashboard/oso',
-    partner: '/dashboard/partner',
-    author:  '/dashboard/author',
-    reader:  '/dashboard/reader',
+    oso:     '/oso',
+    partner: '/partner',
+    author:  '/author',
+    reader:  '/reader',
   }
   return routes[role]
 }

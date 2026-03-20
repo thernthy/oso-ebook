@@ -77,7 +77,7 @@ export default function OsoDashboard() {
         </div>
         <div className="p-6">
           <Link
-            href="/dashboard/oso/verifications"
+            href="/oso/verifications"
             className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900"
           >
             <span>View all pending verifications</span>

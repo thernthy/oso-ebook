@@ -61,7 +61,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
 
       {/* Filters */}
       <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-        <Link href="/dashboard/reader/browse" style={filterChip(!category && !free)}>All</Link>
+        <Link href="/reader/browse" style={filterChip(!category && !free)}>All</Link>
         <Link href="?free=1" style={filterChip(!!free)}>Free</Link>
         {(categories as any[]).map((c: any) => (
           <Link key={c.category} href={`?category=${c.category}`} style={filterChip(category===c.category)}>
@@ -103,7 +103,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Searc
                   {b.is_free ? 'Free' : `$${parseFloat(b.price).toFixed(2)}`}
                 </span>
                 {b.is_owned ? (
-                  <Link href={`/dashboard/reader/read/${b.id}`}
+                  <Link href={`/reader/read/${b.id}`}
                     style={{ padding:'5px 10px', borderRadius:5, background:'#5ba4f5', color:'#0c0d10', fontSize:11, fontWeight:700, textDecoration:'none' }}>
                     Read →
                   </Link>

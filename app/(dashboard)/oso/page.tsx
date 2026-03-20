@@ -90,11 +90,11 @@ export default async function OsoDashboard() {
         </div>
         <div style={{ display:'flex', gap:10 }}>
           {Number(ps.pending_partners) > 0 && (
-            <Link href="/dashboard/oso/partners" style={{ padding:'7px 14px', borderRadius:6, background:'rgba(240,112,96,0.12)', border:'1px solid rgba(240,112,96,0.3)', color:'#f07060', fontSize:12, fontWeight:600, textDecoration:'none', fontFamily:"'JetBrains Mono',monospace" }}>
+            <Link href="/oso/partners" style={{ padding:'7px 14px', borderRadius:6, background:'rgba(240,112,96,0.12)', border:'1px solid rgba(240,112,96,0.3)', color:'#f07060', fontSize:12, fontWeight:600, textDecoration:'none', fontFamily:"'JetBrains Mono',monospace" }}>
               ⚠ {ps.pending_partners} partner{Number(ps.pending_partners)>1?'s':''} pending
             </Link>
           )}
-          <Link href="/dashboard/oso/users/new" style={{ padding:'7px 16px', borderRadius:6, background:'#e8c547', color:'#0c0c0e', fontSize:12, fontWeight:700, textDecoration:'none', fontFamily:"'Syne',system-ui,sans-serif" }}>
+          <Link href="/oso/users/new" style={{ padding:'7px 16px', borderRadius:6, background:'#e8c547', color:'#0c0c0e', fontSize:12, fontWeight:700, textDecoration:'none', fontFamily:"'Syne',system-ui,sans-serif" }}>
             + Invite Partner
           </Link>
         </div>
@@ -124,7 +124,7 @@ export default async function OsoDashboard() {
         <div style={{ background:'#131316', border:'1px solid #2a2a32', borderRadius:10, overflow:'hidden' }}>
           <div style={{ padding:'14px 18px', borderBottom:'1px solid #2a2a32', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#f0efe8' }}>Recent Users</div>
-            <Link href="/dashboard/oso/users" style={{ fontSize:11, color:'#e8c547', fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>View all →</Link>
+            <Link href="/oso/users" style={{ fontSize:11, color:'#e8c547', fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>View all →</Link>
           </div>
           <table style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead>
@@ -175,7 +175,7 @@ export default async function OsoDashboard() {
         <div style={{ background:'#131316', border:'1px solid #2a2a32', borderRadius:10, overflow:'hidden' }}>
           <div style={{ padding:'14px 18px', borderBottom:'1px solid #2a2a32', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ fontSize:13, fontWeight:700, color:'#f0efe8' }}>Platform Revenue</div>
-            <Link href="/dashboard/oso/revenue" style={{ fontSize:11, color:'#e8c547', fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>Full report →</Link>
+            <Link href="/oso/revenue" style={{ fontSize:11, color:'#e8c547', fontFamily:"'JetBrains Mono',monospace", textDecoration:'none' }}>Full report →</Link>
           </div>
           <div style={{ padding:18 }}>
             <div style={{ display:'flex', alignItems:'flex-end', gap:6, height:100, marginBottom:8 }}>
@@ -252,10 +252,10 @@ export default async function OsoDashboard() {
       {/* Role breakdown */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14 }}>
         {[
-          { role:'Partners', count:us.partners, color:'#3dd6a3', href:'/dashboard/oso/partners' },
-          { role:'Authors',  count:us.authors,  color:'#9d7df5', href:'/dashboard/oso/users?role=author' },
-          { role:'Readers',  count:us.readers,  color:'#5ba4f5', href:'/dashboard/oso/users?role=reader' },
-          { role:'Suspended',count:us.suspended,color:'#f07060', href:'/dashboard/oso/users?status=suspended' },
+          { role:'Partners', count:us.partners, color:'#3dd6a3', href:'/oso/partners' },
+          { role:'Authors',  count:us.authors,  color:'#9d7df5', href:'/oso/users?role=author' },
+          { role:'Readers',  count:us.readers,  color:'#5ba4f5', href:'/oso/users?role=reader' },
+          { role:'Suspended',count:us.suspended,color:'#f07060', href:'/oso/users?status=suspended' },
         ].map(r => (
           <Link key={r.role} href={r.href} style={{ background:'#131316', border:'1px solid #2a2a32', borderRadius:10, padding:'16px 20px', textDecoration:'none', display:'block' }}>
             <div style={{ fontSize:11, color:'#6b6b78', fontFamily:"'JetBrains Mono',monospace", letterSpacing:'1px', textTransform:'uppercase' }}>{r.role}</div>

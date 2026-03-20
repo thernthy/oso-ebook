@@ -25,7 +25,7 @@ export default function PurchaseButton({ bookId, price, isFree }: Props) {
     const data = await res.json()
     setLoading(false)
     if (res.ok) {
-      router.push(`/dashboard/reader/read/${bookId}`)
+      router.push(`/reader/read/${bookId}`)
     } else {
       setErr(data.error || 'Purchase failed')
     }
