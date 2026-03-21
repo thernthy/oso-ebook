@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+
+const DocumentEditor = dynamic(() => import('./DocumentEditor'), { ssr: false })
 
 interface Props {
   bookId: string
@@ -22,6 +25,7 @@ export default function FileViewer({ bookId }: Props) {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
   const [scale, setScale] = useState(1)
+  const [showEditor, setShowEditor] = useState(false)
 
   useEffect(() => {
     fetchFile()
@@ -80,11 +84,41 @@ export default function FileViewer({ bookId }: Props) {
     )
   }
 
+  if (showEditor && pdfUrl && file) {
+    return (
+      <div style={{ background:'#151420', border:'1px solid #272635', borderRadius:10, overflow:'hidden' }}>
+        <div style={{ padding:'12px 16px', borderBottom:'1px solid #272635', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            <button onClick={() => setShowEditor(false)} style={{ padding:'6px 12px', borderRadius:6, background:'transparent', border:'1px solid #272635', color:'#635e80', fontSize:12, cursor:'pointer' }}>
+              ← Back to Preview
+            </button>
+            <span style={{ fontSize:14, fontWeight:700, color:'#eeecf8' }}>Edit Mode</span>
+          </div>
+        </div>
+        <DocumentEditor
+          bookId={bookId}
+          fileUrl={pdfUrl}
+          storageKey={file.storage_key}
+          onSave={() => {
+            setShowEditor(false)
+            fetchFile()
+          }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div style={{ background:'#151420', border:'1px solid #272635', borderRadius:10, overflow:'hidden' }}>
       <div style={{ padding:'14px 18px', borderBottom:'1px solid #272635', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div style={{ fontSize:13, fontWeight:700, color:'#eeecf8' }}>Book File</div>
         <div style={{ display:'flex', gap:8 }}>
+          {file.format === 'pdf' && pdfUrl && (
+            <button onClick={() => setShowEditor(true)}
+              style={{ padding:'4px 10px', borderRadius:4, background:'rgba(157,125,245,0.12)', color:'#9d7df5', fontSize:11, fontWeight:600, border:'none', cursor:'pointer', fontFamily:"'JetBrains Mono',monospace" }}>
+              ✏️ Edit
+            </button>
+          )}
           {pdfUrl && (
             <a href={pdfUrl} download={file.original_name}
               style={{ padding:'4px 10px', borderRadius:4, background:'rgba(61,214,163,0.12)', color:'#3dd6a3', fontSize:11, fontWeight:600, textDecoration:'none', fontFamily:"'JetBrains Mono',monospace" }}>
@@ -138,16 +172,6 @@ export default function FileViewer({ bookId }: Props) {
                 transformOrigin: 'top center',
               }}
               title="PDF Viewer"
-              onLoad={(e) => {
-                // Try to get total pages from PDF
-                const iframe = e.target as HTMLIFrameElement
-                try {
-                  // For simplicity, we'll use a direct PDF embed
-                  // A more advanced implementation would use pdf.js
-                } catch (err) {
-                  console.log('PDF load attempted')
-                }
-              }}
             />
           </div>
         )}
