@@ -16,6 +16,7 @@ The OSO E-Book Platform is a multi-role digital publishing system built with **N
   - `(dashboard)/`: Route groups for different user roles.
     - `oso/`: Admin dashboard.
       - `analytics/`: Platform-wide performance metrics, user growth, and revenue distribution.
+      - `revenue/`: Detailed financial ledger, payout tracking, and sales trends.
     - `partner/`: Partner management dashboard.
       - `books/`: Review queue for books submitted by authors.
       - `authors/`: List of authors under the partner with stats.
