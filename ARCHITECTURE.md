@@ -32,12 +32,17 @@ The OSO E-Book Platform is a multi-role digital publishing system built with **N
 - `components/`: Reusable UI components.
   - `ui/`: Generic UI elements (AccountPopup, etc.).
   - `[role]/`: Role-specific components.
-    - `author/`: BookUploadPanel, ChapterList, BookActions, CoverUpload, BookSettings.
+    - `author/`: BookUploadPanel, ChapterList, BookActions, CoverUpload, BookSettings, FileViewer.
     - `partner/`: ReviewActions.
+    - `reader/`: BookReader.
 - `lib/`: Utility libraries.
   - `db.ts`: Database connection pool. Implements a **singleton pattern** for development to prevent "Too many connections" errors during hot-reloads.
   - `permissions.ts`: Role-based access control logic.
   - `api-helpers.ts`: Helper functions for API responses (ok, err, requireAuth, requirePermission).
+  - `parsers.ts`: File format detection and parsing (PDF, EPUB, DOCX, TXT).
+  - `ai-chapters.ts`: OpenAI GPT-4 integration for chapter detection and arrangement.
+  - `cover-processor.ts`: Cover image analysis and cropping.
+  - `storage.ts`: Local/S3 file storage abstraction.
 - `database/`: SQL migration files.
 
 ## 4. Role-Based Access Control (RBAC)
@@ -84,9 +89,11 @@ Access control is enforced via `middleware.ts` and per-route checks in API handl
 ### Author Book Detail (`/author/books/[id]`)
 - Book stats row: total reads, chapters, words, reading time, price.
 - Breadcrumb navigation.
-- Cover upload with cropping.
+- Cover upload with cropping and preview.
 - Book file upload with AI chapter detection.
-- Chapter list with publish toggle, edit, delete.
+- **FileViewer**: PDF preview with zoom controls and download.
+- **Chapter list**: publish toggle, edit title, delete chapters.
+- **Split Chapters**: AI-powered chapter detection from uploaded file.
 - Book settings panel (title, description, category, price, free toggle).
 - Submit for review action.
 - Review feedback display for rejected books.
@@ -96,10 +103,12 @@ Access control is enforced via `middleware.ts` and per-route checks in API handl
 ### Books
 - `GET/POST /api/books` - List/create books
 - `GET/PATCH/DELETE /api/books/:id` - Book CRUD
-- `POST /api/books/:id/cover` - Upload cover image
+- `GET/POST /api/books/:id/cover` - Get/upload cover image
 - `POST /api/books/:id/upload` - Upload book file
+- `GET /api/books/:id/files` - Get uploaded files
 - `GET/POST /api/books/:id/chapters` - List/create chapters
 - `PATCH/DELETE /api/books/:id/chapters/:chapterId` - Update/delete chapter
+- `GET/POST /api/books/:id/chapters/split` - AI-powered chapter splitting from file
 - `POST /api/books/:id/chapters/arrange` - AI auto-arrange chapters
 
 ### Partners
@@ -123,6 +132,18 @@ Access control is enforced via `middleware.ts` and per-route checks in API handl
 - `purchases` - Reader purchases
 - `reading_progress` - Reader reading progress
 - `bookmarks` - Reader bookmarks
+
+## 10. Reader Features
+
+### Reader Reading Experience (`/reader/read/[bookId]`)
+- Full-screen book reader with page-turn animation.
+- Themes: Dark, Light, Sepia.
+- Font customization: Serif, Sans, Mono, Palatino with adjustable size.
+- Line height adjustment.
+- Chapter navigation sidebar.
+- Progress tracking (auto-saves every 10 seconds).
+- Bookmarking.
+- Keyboard navigation (arrow keys, spacebar).
 
 ## 9. Maintenance Mandate
 > **CRITICAL:** Any update, architectural change, or new feature implementation MUST be reflected in this `ARCHITECTURE.md` file to guide future development and AI assistants.
