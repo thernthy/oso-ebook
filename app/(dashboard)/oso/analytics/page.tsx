@@ -42,11 +42,11 @@ export default async function OsoAnalytics() {
     `),
     // Category distribution
     pool.execute(`
-      SELECT category, COUNT(*) AS count, SUM(total_reads) AS reads
+      SELECT category, COUNT(*) AS count, SUM(total_reads) AS total_reads_count
       FROM books
       WHERE category IS NOT NULL
       GROUP BY category
-      ORDER BY reads DESC
+      ORDER BY total_reads_count DESC
       LIMIT 5
     `),
     // Partner performance (top 5 by author count)
@@ -169,11 +169,12 @@ export default async function OsoAnalytics() {
             {cs.map(c => (
               <div key={c.category} style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                 <div style={{ fontSize:12, color:'#6b6b78' }}>{c.category}</div>
-                <div style={{ fontSize:11, color:'#5ba4f5', fontFamily:"'JetBrains Mono',monospace" }}>{c.reads.toLocaleString()} reads</div>
+                <div style={{ fontSize:11, color:'#5ba4f5', fontFamily:"'JetBrains Mono',monospace" }}>{c.total_reads_count.toLocaleString()} reads</div>
               </div>
             ))}
           </div>
         </div>
+
 
         {/* Partner Engagement */}
         <div style={{ background:'#131316', border:'1px solid #2a2a32', borderRadius:12, padding:20 }}>
