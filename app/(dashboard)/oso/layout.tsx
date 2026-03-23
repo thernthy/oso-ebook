@@ -3,28 +3,35 @@ import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
 import { redirect }         from 'next/navigation'
 import Link                 from 'next/link'
 import AccountPopup         from '@/components/ui/AccountPopup'
-
-const nav = [
-  { section: 'Overview' },
-  { label: 'Command Center', href: '/oso',          icon: '⬡' },
-  { label: 'Analytics',      href: '/oso/analytics', icon: '◈' },
-  { section: 'Management' },
-  { label: 'All Users',      href: '/oso/users',    icon: '◎' },
-  { label: 'Partners',       href: '/oso/partners', icon: '◇' },
-  { label: 'Books Catalog',  href: '/oso/books',    icon: '▭' },
-  { section: 'Finance' },
-  { label: 'Revenue',        href: '/oso/revenue',  icon: '◈' },
-  { label: 'Payouts',        href: '/oso/payouts',  icon: '◁' },
-  { section: 'System' },
-  { label: 'Platform Settings', href: '/oso/settings', icon: '⊙' },
-  { label: 'Storage Config', href: '/oso/settings#storage', icon: '◫' },
-]
+import LanguageSwitcher     from '@/components/ui/LanguageSwitcher'
+import SessionTracker       from '@/components/oso/SessionTracker'
+import { getTranslations }  from '@/lib/i18n/server'
 
 export default async function OsoLayout({ children }: { children: React.ReactNode }) {
+  const t = getTranslations()
   const session = await getServerSession(authOptions)
   if (!session || session.user.role !== 'oso') redirect('/auth/login')
 
   const user = session.user
+
+  const nav = [
+    { section: 'Overview' },
+    { label: t('commandCenter'), href: '/oso',          icon: '⬡' },
+    { label: t('analytics'),      href: '/oso/analytics', icon: '◈' },
+    { section: 'Management' },
+    { label: t('users'),      href: '/oso/users',    icon: '◎' },
+    { label: t('partners'),       href: '/oso/partners', icon: '◇' },
+    { label: t('books'),  href: '/oso/books',    icon: '▭' },
+    { section: 'Finance' },
+    { label: t('revenue'),        href: '/oso/revenue',  icon: '◈' },
+    { label: 'Payouts',        href: '/oso/payouts',  icon: '◁' },
+    { section: 'System' },
+    { label: 'Sessions', href: '/oso/sessions', icon: '◉' },
+    { label: 'Logs', href: '/oso/logs', icon: '☰' },
+    { label: 'IP Rules', href: '/oso/ip-rules', icon: '⊞' },
+    { label: t('settings'), href: '/oso/settings', icon: '⊙' },
+    { label: 'Storage Config', href: '/oso/settings#storage', icon: '◫' },
+  ]
 
   return (
     <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'#0c0c0e', fontFamily:"'Syne',system-ui,sans-serif" }}>
@@ -63,11 +70,13 @@ export default async function OsoLayout({ children }: { children: React.ReactNod
 
         {/* Profile */}
         <div style={{ padding:'16px 20px', borderTop:'1px solid #2a2a32' }}>
+          <LanguageSwitcher />
           <AccountPopup user={user} />
         </div>
       </aside>
 
       <main style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+        <SessionTracker />
         {children}
       </main>
     </div>
