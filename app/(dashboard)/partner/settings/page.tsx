@@ -36,6 +36,8 @@ export default function PartnerSettingsPage() {
   const [roleDesc, setRoleDesc] = useState('')
   const [roleColor, setRoleColor] = useState('#9d7df5')
   const [selectedPerms, setSelectedPerms] = useState<string[]>([])
+  const [error, setError] = useState('')
+  const [creating, setCreating] = useState(false)
 
   useEffect(() => { loadData() }, [])
 
@@ -81,18 +83,34 @@ export default function PartnerSettingsPage() {
   }
 
   async function createRole() {
-    if (!roleName.trim()) return
-    await fetch('/api/partner/roles', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: roleName, description: roleDesc, color: roleColor, permissions: selectedPerms }),
-    })
-    setRoleName('')
-    setRoleDesc('')
-    setRoleColor('#9d7df5')
-    setSelectedPerms([])
-    setShowRoleForm(false)
-    loadData()
+    if (!roleName.trim()) {
+      setError('Role name is required')
+      return
+    }
+    setCreating(true)
+    setError('')
+    try {
+      const res = await fetch('/api/partner/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: roleName, description: roleDesc, color: roleColor, permissions: selectedPerms }),
+      })
+      const j = await res.json()
+      if (j.success) {
+        setRoleName('')
+        setRoleDesc('')
+        setRoleColor('#9d7df5')
+        setSelectedPerms([])
+        setShowRoleForm(false)
+        loadData()
+      } else {
+        setError(j.error || 'Failed to create role')
+      }
+    } catch (e) {
+      setError('Network error. Please try again.')
+    } finally {
+      setCreating(false)
+    }
   }
 
   async function deleteRole(roleId: string) {
@@ -271,12 +289,17 @@ export default function PartnerSettingsPage() {
                     ))}
                   </div>
                 </div>
+                {error && (
+                  <div style={{ padding: '8px 12px', background: 'rgba(240,112,96,0.1)', border: '1px solid rgba(240,112,96,0.3)', borderRadius: 6, fontSize: 11, color: '#f07060' }}>
+                    {error}
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                  <button onClick={createRole}
-                    style={{ padding: '8px 16px', borderRadius: 6, background: '#3dd6a3', color: '#0c0e0f', fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none' }}>
-                    Create Role
+                  <button onClick={createRole} disabled={creating}
+                    style={{ padding: '8px 16px', borderRadius: 6, background: '#3dd6a3', color: '#0c0e0f', fontSize: 11, fontWeight: 700, cursor: creating ? 'not-allowed' : 'pointer', border: 'none', opacity: creating ? 0.6 : 1 }}>
+                    {creating ? 'Creating…' : 'Create Role'}
                   </button>
-                  <button onClick={() => setShowRoleForm(false)}
+                  <button onClick={() => { setShowRoleForm(false); setError('') }}
                     style={{ padding: '8px 16px', borderRadius: 6, background: 'transparent', color: '#5e6b70', fontSize: 11, cursor: 'pointer', border: '1px solid #252c30' }}>
                     Cancel
                   </button>
