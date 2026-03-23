@@ -25,6 +25,7 @@ async function migrate() {
     '004_author_features.sql',
     '005_revenue.sql',
     '006_reader.sql',
+    '007_author_partner_reviews.sql',
   ];
 
   for (const file of migrationFiles) {

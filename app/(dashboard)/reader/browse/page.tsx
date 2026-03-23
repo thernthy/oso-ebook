@@ -1,137 +1,433 @@
-import { getServerSession } from 'next-auth'
-import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
-import pool                 from '@/lib/db'
-import Link                 from 'next/link'
-import PurchaseButton       from '@/components/reader/PurchaseButton'
+'use client'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+import PurchaseButton from '@/components/reader/PurchaseButton'
 
-type SearchParams = { category?: string; sort?: string; free?: string; search?: string }
-
-export default async function BrowsePage({ searchParams }: { searchParams: SearchParams }) {
-  const session  = await getServerSession(authOptions)
-  const userId   = session!.user.id
-  const category = searchParams.category || ''
-  const sort     = searchParams.sort     || 'newest'
-  const free     = searchParams.free     || ''
-  const search   = searchParams.search   || ''
-
-  const conditions = ["b.status='published'"]
-  const params: unknown[] = [userId, userId]
-  if (category) { conditions.push('b.category=?');  params.push(category) }
-  if (search)   { conditions.push('(b.title LIKE ? OR u.name LIKE ?)'); params.push(`%${search}%`,`%${search}%`) }
-  if (free)     { conditions.push('b.is_free=1') }
-
-  const orderMap: Record<string,string> = {
-    newest:'b.created_at DESC', popular:'b.total_reads DESC',
-    price_asc:'b.price ASC', price_desc:'b.price DESC',
-  }
-  const order = orderMap[sort] || orderMap.newest
-
-  const [books] = await pool.execute(
-    `SELECT b.id, b.title, b.description, b.cover_url, b.price, b.is_free,
-            b.is_featured, b.category, b.total_reads,
-            u.name AS author_name,
-            COUNT(DISTINCT c.id) AS chapter_count,
-            COALESCE(AVG(r.rating),0) AS avg_rating,
-            COUNT(DISTINCT r.id) AS review_count,
-            MAX(CASE WHEN pu.user_id=? THEN 1 ELSE 0 END) AS is_owned
-     FROM books b
-     JOIN users u ON b.author_id=u.id
-     LEFT JOIN chapters c ON c.book_id=b.id AND c.is_published=1
-     LEFT JOIN reviews r ON r.book_id=b.id
-     LEFT JOIN purchases pu ON pu.book_id=b.id AND pu.user_id=?
-     WHERE ${conditions.join(' AND ')}
-     GROUP BY b.id ORDER BY ${order} LIMIT 24`,
-    params
-  ) as any[]
-
-  const [categories] = await pool.execute(
-    `SELECT category, COUNT(*) AS count FROM books WHERE status='published' AND category IS NOT NULL
-     GROUP BY category ORDER BY count DESC`
-  ) as any[]
-
-  return (
-    <div style={{ flex:1, overflowY:'auto', padding:'24px 28px', display:'flex', flexDirection:'column', gap:16 }}>
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <div style={{ fontSize:20, fontWeight:800, color:'#e8eaf8', letterSpacing:'-0.4px' }}>Browse Books</div>
-        <div style={{ display:'flex', gap:8 }}>
-          <form><input name="search" defaultValue={search} placeholder="Search…"
-            style={{ background:'#1b1c2e', border:'1px solid #252840', borderRadius:6, padding:'7px 12px', fontSize:12, color:'#e8eaf8', outline:'none', fontFamily:"'JetBrains Mono',monospace", width:180 }} /></form>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-        <Link href="/reader/browse" style={filterChip(!category && !free)}>All</Link>
-        <Link href="?free=1" style={filterChip(!!free)}>Free</Link>
-        {(categories as any[]).map((c: any) => (
-          <Link key={c.category} href={`?category=${c.category}`} style={filterChip(category===c.category)}>
-            {c.category} <span style={{ opacity:0.5, marginLeft:3 }}>{c.count}</span>
-          </Link>
-        ))}
-      </div>
-
-      {/* Sort */}
-      <div style={{ display:'flex', gap:6 }}>
-        {[['newest','Newest'],['popular','Popular'],['price_asc','Price ↑'],['price_desc','Price ↓']].map(([val,lbl]) => (
-          <Link key={val} href={`?sort=${val}${category?`&category=${category}`:''}`}
-            style={{ padding:'4px 10px', borderRadius:4, fontSize:11, fontWeight:600, fontFamily:"'JetBrains Mono',monospace", textDecoration:'none', background: sort===val?'rgba(91,164,245,0.15)':'transparent', border:`1px solid ${sort===val?'rgba(91,164,245,0.4)':'#252840'}`, color: sort===val?'#5ba4f5':'#5a5e80' }}>
-            {lbl}
-          </Link>
-        ))}
-      </div>
-
-      {/* Grid */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(180px, 1fr))', gap:16 }}>
-        {(books as any[]).map((b: any) => (
-          <div key={b.id} style={{ background:'#131520', border:'1px solid #252840', borderRadius:10, overflow:'hidden', display:'flex', flexDirection:'column' }}>
-            {b.is_featured && (
-              <div style={{ background:'rgba(232,197,71,0.15)', padding:'3px 10px', fontSize:10, fontWeight:700, color:'#e8c547', fontFamily:"'JetBrains Mono',monospace", textAlign:'center' }}>✦ FEATURED</div>
-            )}
-            <div style={{ height:110, background:'rgba(91,164,245,0.06)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:40 }}>📘</div>
-            <div style={{ padding:12, flex:1, display:'flex', flexDirection:'column' }}>
-              <div style={{ fontSize:13, fontWeight:700, color:'#e8eaf8', marginBottom:2, lineHeight:1.3 }}>{b.title}</div>
-              <div style={{ fontSize:11, color:'#5a5e80', fontFamily:"'JetBrains Mono',monospace", marginBottom:4 }}>{b.author_name}</div>
-              {b.avg_rating > 0 && (
-                <div style={{ fontSize:11, color:'#e8c547', marginBottom:4 }}>
-                  {'★'.repeat(Math.round(b.avg_rating))}{'☆'.repeat(5-Math.round(b.avg_rating))}
-                  <span style={{ color:'#5a5e80', marginLeft:4 }}>({b.review_count})</span>
-                </div>
-              )}
-              <div style={{ flex:1 }} />
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:8 }}>
-                <span style={{ fontSize:13, fontWeight:700, color: b.is_free ? '#3dd6a3' : '#e8eaf8', fontFamily:"'JetBrains Mono',monospace" }}>
-                  {b.is_free ? 'Free' : `$${parseFloat(b.price).toFixed(2)}`}
-                </span>
-                {b.is_owned ? (
-                  <Link href={`/reader/read/${b.id}`}
-                    style={{ padding:'5px 10px', borderRadius:5, background:'#5ba4f5', color:'#0c0d10', fontSize:11, fontWeight:700, textDecoration:'none' }}>
-                    Read →
-                  </Link>
-                ) : (
-                  <PurchaseButton bookId={b.id} price={b.price} isFree={b.is_free} />
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {(books as any[]).length === 0 && (
-        <div style={{ textAlign:'center', padding:'48px', color:'#5a5e80' }}>
-          <div style={{ fontSize:28, marginBottom:10 }}>📭</div>
-          <div style={{ fontSize:14 }}>No books found</div>
-        </div>
-      )}
-    </div>
-  )
+type Book = {
+  id: number
+  title: string
+  description: string
+  cover_url: string | null
+  price: number
+  is_free: number
+  is_featured: number
+  category: string
+  total_reads: number
+  author_name: string
+  chapter_count: number
+  avg_rating: number
+  review_count: number
+  is_owned: number
 }
 
-function filterChip(active: boolean): React.CSSProperties {
-  return {
-    padding:'5px 12px', borderRadius:5, fontSize:11, fontWeight:600,
-    fontFamily:"'JetBrains Mono',monospace", textDecoration:'none',
-    background: active ? 'rgba(91,164,245,0.15)' : '#131520',
-    border: `1px solid ${active ? 'rgba(91,164,245,0.4)' : '#252840'}`,
-    color: active ? '#5ba4f5' : '#5a5e80',
+type Category = {
+  category: string
+  count: number
+}
+
+export default function BrowsePage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [books, setBooks] = useState<Book[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [totalBooks, setTotalBooks] = useState(0)
+
+  const category = searchParams.get('category') || ''
+  const sort = searchParams.get('sort') || 'newest'
+  const free = searchParams.get('free') || ''
+  const search = searchParams.get('search') || ''
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (category) params.set('category', category)
+      if (sort) params.set('sort', sort)
+      if (free) params.set('free', '1')
+      if (search) params.set('search', search)
+      params.set('limit', '24')
+      params.set('offset', '0')
+
+      const res = await fetch(`/api/catalog?${params.toString()}`)
+      if (res.ok) {
+        const data = await res.json()
+        setBooks(data.books || [])
+        setTotalBooks(data.total || 0)
+        setCategories(data.categories || [])
+      }
+    } catch (e) {
+      console.error('Failed to fetch books', e)
+    } finally {
+      setLoading(false)
+    }
+  }, [category, sort, free, search])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const updateParams = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value) {
+      params.set(key, value)
+    } else {
+      params.delete(key)
+    }
+    router.push(`/reader/browse?${params.toString()}`)
   }
+
+  const sortOptions = [
+    { value: 'newest', label: '🔥 Newest' },
+    { value: 'popular', label: '⭐ Popular' },
+    { value: 'price_asc', label: '💰 Price: Low' },
+    { value: 'price_desc', label: '💸 Price: High' },
+  ]
+
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: '#09090b' }}>
+      {/* Header */}
+      <div style={{
+        background: 'linear-gradient(135deg, #18181b 0%, #09090b 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        padding: '32px 40px'
+      }}>
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: 800,
+          color: '#ffffff',
+          marginBottom: '8px',
+          letterSpacing: '-0.5px'
+        }}>
+          Browse Books
+        </h1>
+        <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)' }}>
+          Discover {totalBooks} amazing reads
+        </p>
+      </div>
+
+      {/* Search & Filters */}
+      <div style={{ padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        {/* Search Bar */}
+        <form style={{ marginBottom: '20px' }} onSubmit={(e) => {
+          e.preventDefault()
+          const formData = new FormData(e.currentTarget)
+          updateParams('search', formData.get('search') as string)
+        }}>
+          <div style={{ position: 'relative', maxWidth: '400px' }}>
+            <input
+              name="search"
+              defaultValue={search}
+              placeholder="Search by title or author..."
+              style={{
+                width: '100%',
+                padding: '14px 20px 14px 48px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                fontSize: '14px',
+                color: '#ffffff',
+                outline: 'none',
+                transition: 'all 0.2s ease'
+              }}
+            />
+            <span style={{
+              position: 'absolute',
+              left: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'rgba(255,255,255,0.4)',
+              fontSize: '16px'
+            }}>
+              🔍
+            </span>
+          </div>
+        </form>
+
+        {/* Category Pills */}
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+          <button
+            onClick={() => updateParams('category', '')}
+            style={{
+              padding: '8px 18px',
+              borderRadius: '20px',
+              background: !category && !free ? 'linear-gradient(135deg, #7c3aed, #ec4899)' : 'rgba(255,255,255,0.05)',
+              border: '1px solid ' + (!category && !free ? 'transparent' : 'rgba(255,255,255,0.1)'),
+              color: '#ffffff',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            All
+          </button>
+          <button
+            onClick={() => {
+              updateParams('free', free === '1' ? '' : '1')
+              updateParams('category', '')
+            }}
+            style={{
+              padding: '8px 18px',
+              borderRadius: '20px',
+              background: free === '1' ? 'linear-gradient(135deg, #10b981, #34d399)' : 'rgba(255,255,255,0.05)',
+              border: '1px solid ' + (free === '1' ? 'transparent' : 'rgba(255,255,255,0.1)'),
+              color: '#ffffff',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ✨ Free
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.category}
+              onClick={() => updateParams('category', category === cat.category ? '' : cat.category)}
+              style={{
+                padding: '8px 18px',
+                borderRadius: '20px',
+                background: category === cat.category ? 'linear-gradient(135deg, #7c3aed, #ec4899)' : 'rgba(255,255,255,0.05)',
+                border: '1px solid ' + (category === cat.category ? 'transparent' : 'rgba(255,255,255,0.1)'),
+                color: '#ffffff',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {cat.category} <span style={{ opacity: 0.6, marginLeft: '4px' }}>({cat.count})</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Sort Options */}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {sortOptions.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => updateParams('sort', opt.value)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '10px',
+                background: sort === opt.value ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.03)',
+                border: '1px solid ' + (sort === opt.value ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.08)'),
+                color: sort === opt.value ? '#a78bfa' : 'rgba(255,255,255,0.6)',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Books Grid */}
+      <div style={{ padding: '32px 40px' }}>
+        {loading ? (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: '24px'
+          }}>
+            {[...Array(12)].map((_, i) => (
+              <div key={i} style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                borderRadius: '16px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  height: '280px',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))',
+                  animation: 'pulse 1.5s ease-in-out infinite'
+                }} />
+                <div style={{ padding: '16px' }}>
+                  <div style={{
+                    height: '20px',
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '4px',
+                    marginBottom: '8px',
+                    animation: 'pulse 1.5s ease-in-out infinite'
+                  }} />
+                  <div style={{
+                    height: '14px',
+                    width: '60%',
+                    background: 'rgba(255,255,255,0.03)',
+                    borderRadius: '4px',
+                    animation: 'pulse 1.5s ease-in-out infinite'
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : books.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '80px 20px',
+            color: 'rgba(255,255,255,0.5)'
+          }}>
+            <div style={{ fontSize: '64px', marginBottom: '16px' }}>📭</div>
+            <div style={{ fontSize: '18px', fontWeight: 600, color: '#ffffff', marginBottom: '8px' }}>
+              No books found
+            </div>
+            <p style={{ fontSize: '14px' }}>
+              Try adjusting your search or filters
+            </p>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: '24px'
+          }}>
+            {books.map((book, idx) => (
+              <Link
+                key={book.id}
+                href={`/reader/books/${book.id}`}
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  textDecoration: 'none',
+                  transition: 'all 0.3s ease',
+                  display: 'block',
+                  position: 'relative'
+                }}
+              >
+                {/* Badges */}
+                <div style={{ position: 'absolute', top: '12px', left: '12px', right: '12px', display: 'flex', justifyContent: 'space-between', zIndex: 2 }}>
+                  {book.is_featured === 1 && (
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: 'linear-gradient(135deg, #f97316, #ef4444)',
+                      color: '#ffffff',
+                      fontSize: '9px',
+                      fontWeight: 700,
+                      letterSpacing: '0.5px'
+                    }}>
+                      ✦ FEATURED
+                    </span>
+                  )}
+                  {book.is_owned === 1 && (
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: 'rgba(16,185,129,0.9)',
+                      color: '#ffffff',
+                      fontSize: '9px',
+                      fontWeight: 700
+                    }}>
+                      ✓ OWNED
+                    </span>
+                  )}
+                </div>
+
+                {/* Cover */}
+                <div style={{
+                  height: '280px',
+                  background: book.cover_url
+                    ? `url(${book.cover_url}) center/cover`
+                    : `linear-gradient(135deg, hsl(${idx * 45}, 60%, 25%), hsl(${idx * 45 + 30}, 50%, 15%))`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '56px',
+                  transition: 'transform 0.3s ease'
+                }}>
+                  {!book.cover_url && '📖'}
+                </div>
+
+                {/* Info */}
+                <div style={{ padding: '16px' }}>
+                  <div style={{
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    marginBottom: '4px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {book.title}
+                  </div>
+                  <div style={{
+                    fontSize: '12px',
+                    color: 'rgba(255,255,255,0.5)',
+                    marginBottom: '10px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {book.author_name}
+                  </div>
+
+                  {/* Rating */}
+                  {book.avg_rating > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px' }}>
+                      <span style={{ color: '#fbbf24', fontSize: '12px' }}>
+                        {'★'.repeat(Math.round(book.avg_rating))}
+                        <span style={{ color: 'rgba(255,255,255,0.2)' }}>
+                          {'☆'.repeat(5 - Math.round(book.avg_rating))}
+                        </span>
+                      </span>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                        ({book.review_count})
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Price & CTA */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{
+                      fontSize: '15px',
+                      fontWeight: 700,
+                      color: book.is_free ? '#34d399' : '#a78bfa'
+                    }}>
+                      {book.is_free ? 'Free' : `$${parseFloat(String(book.price)).toFixed(2)}`}
+                    </span>
+                    {book.is_owned === 1 ? (
+                      <span style={{
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        background: 'rgba(91,164,245,0.15)',
+                        color: '#60a5fa',
+                        fontSize: '11px',
+                        fontWeight: 700
+                      }}>
+                        Read →
+                      </span>
+                    ) : (
+                      <span
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                        }}
+                      >
+                        <PurchaseButton bookId={book.id} price={book.price} isFree={book.is_free === 1} compact />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style jsx global>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.7; }
+        }
+      `}</style>
+    </div>
+  )
 }

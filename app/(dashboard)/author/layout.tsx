@@ -3,8 +3,11 @@ import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
 import { redirect }         from 'next/navigation'
 import Link                 from 'next/link'
 import AccountPopup         from '@/components/ui/AccountPopup'
+import LanguageSwitcher     from '@/components/ui/LanguageSwitcher'
+import { getTranslations }  from '@/lib/i18n/server'
 
 export default async function AuthorLayout({ children }: { children: React.ReactNode }) {
+  const t = getTranslations()
   const session = await getServerSession(authOptions)
   if (!session) redirect('/auth/login')
   if (!['author', 'oso'].includes(session.user.role)) redirect('/auth/login')
@@ -28,16 +31,19 @@ export default async function AuthorLayout({ children }: { children: React.React
 
         <nav style={{ flex:1, padding:'12px 0', overflowY:'auto' }}>
           {[
-            { label:'Overview',   href:'/author',          icon:'⬡' },
-            { label:'My Books',   href:'/author/books',     icon:'▭' },
-            { label:'New Book',   href:'/author/books/new', icon:'+' },
-            { label:'Earnings',   href:'/author/revenue',   icon:'◈' },
+            { label:t('home'),     href:'/author',              icon:'⬡' },
+            { label:t('myBooks'),     href:'/author/books',         icon:'▭' },
+            { label:t('newBook'),     href:'/author/books/new',     icon:'+' },
+            { label:t('partners'),     href:'/author/partners',      icon:'🤝' },
+            { label:'Reviews',     href:'/author/reviews',        icon:'⭐' },
+            { label:'Earnings',    href:'/author/revenue',        icon:'◈' },
           ].map(item => (
             <NavItem key={item.href} {...item} />
           ))}
         </nav>
 
         <div style={{ padding:'16px 20px', borderTop:'1px solid #272635' }}>
+          <LanguageSwitcher />
           <AccountPopup user={user} />
         </div>
       </aside>

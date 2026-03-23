@@ -3,8 +3,11 @@ import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
 import { redirect }         from 'next/navigation'
 import Link                 from 'next/link'
 import AccountPopup         from '@/components/ui/AccountPopup'
+import LanguageSwitcher     from '@/components/ui/LanguageSwitcher'
+import { getTranslations }  from '@/lib/i18n/server'
 
 export default async function PartnerLayout({ children }: { children: React.ReactNode }) {
+  const t = getTranslations()
   const session = await getServerSession(authOptions)
   if (!session) redirect('/auth/login')
   if (!['partner', 'oso'].includes(session.user.role)) redirect('/auth/login')
@@ -25,11 +28,11 @@ export default async function PartnerLayout({ children }: { children: React.Reac
         </div>
         <nav style={{ flex:1, padding:'12px 0', overflowY:'auto' }}>
           {[
-            { label:'Dashboard',     href:'/partner',              icon:'⬡' },
-            { label:'Review Queue',  href:'/partner/books',        icon:'⏳' },
-            { label:'My Authors',    href:'/partner/authors',      icon:'△'  },
-            { label:'Revenue',       href:'/partner/revenue',      icon:'◈'  },
-            { label:'Invite Author', href:`/partner/authors/invite`, icon:'+' },
+            { label:t('dashboard'),     href:'/partner',                  icon:'⬡' },
+            { label:t('reviewQueue'),  href:'/partner/books',            icon:'⏳' },
+            { label:t('authorStats'),    href:'/partner/authors/manage',    icon:'👥' },
+            { label:t('revenue'),       href:'/partner/revenue',          icon:'◈'  },
+            { label:t('inviteAuthor'), href:`/partner/authors/invite`,    icon:'+' },
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 20px', color:'#5e6b70', fontSize:13, fontWeight:500, textDecoration:'none', borderLeft:'2px solid transparent' }}>
@@ -39,6 +42,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
           ))}
         </nav>
         <div style={{ padding:'16px 20px', borderTop:'1px solid #252c30' }}>
+          <LanguageSwitcher />
           <AccountPopup user={user} />
         </div>
       </aside>
