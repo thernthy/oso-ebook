@@ -52,6 +52,10 @@ class SessionStore {
     return this.getAll().filter(s => s.userId === userId)
   }
 
+  getById(sessionId: string): ActiveSession | undefined {
+    return this.sessions.get(sessionId)
+  }
+
   count(): number {
     return this.getAll().length
   }

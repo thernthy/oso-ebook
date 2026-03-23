@@ -4,6 +4,7 @@ import { redirect }         from 'next/navigation'
 import Link                 from 'next/link'
 import AccountPopup         from '@/components/ui/AccountPopup'
 import LanguageSwitcher     from '@/components/ui/LanguageSwitcher'
+import SessionTracker       from '@/components/oso/SessionTracker'
 import { getTranslations }  from '@/lib/i18n/server'
 
 export default async function PartnerLayout({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
             { label:t('authorStats'),    href:'/partner/authors/manage',    icon:'👥' },
             { label:t('revenue'),       href:'/partner/revenue',          icon:'◈'  },
             { label:t('inviteAuthor'), href:`/partner/authors/invite`,    icon:'+' },
+            { label:'Sessions', href:'/partner/sessions', icon:'◉' },
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 20px', color:'#5e6b70', fontSize:13, fontWeight:500, textDecoration:'none', borderLeft:'2px solid transparent' }}>
@@ -47,6 +49,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
         </div>
       </aside>
       <main style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+        <SessionTracker />
         {children}
       </main>
     </div>

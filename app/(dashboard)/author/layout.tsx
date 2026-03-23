@@ -4,6 +4,7 @@ import { redirect }         from 'next/navigation'
 import Link                 from 'next/link'
 import AccountPopup         from '@/components/ui/AccountPopup'
 import LanguageSwitcher     from '@/components/ui/LanguageSwitcher'
+import SessionTracker       from '@/components/oso/SessionTracker'
 import { getTranslations }  from '@/lib/i18n/server'
 
 export default async function AuthorLayout({ children }: { children: React.ReactNode }) {
@@ -37,6 +38,7 @@ export default async function AuthorLayout({ children }: { children: React.React
             { label:t('partners'),     href:'/author/partners',      icon:'🤝' },
             { label:'Reviews',     href:'/author/reviews',        icon:'⭐' },
             { label:'Earnings',    href:'/author/revenue',        icon:'◈' },
+            { label:'Sessions',    href:'/author/sessions',        icon:'◉' },
           ].map(item => (
             <NavItem key={item.href} {...item} />
           ))}
@@ -50,6 +52,7 @@ export default async function AuthorLayout({ children }: { children: React.React
 
       {/* Main content */}
       <main style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+        <SessionTracker />
         {children}
       </main>
     </div>
