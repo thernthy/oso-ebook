@@ -3,8 +3,10 @@ import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
 import pool                 from '@/lib/db'
 import { redirect }         from 'next/navigation'
 import Link                 from 'next/link'
+import { getTranslations }  from '@/lib/i18n/server'
 
 export default async function AuthorDashboard() {
+  const t = getTranslations()
   const session = await getServerSession(authOptions)
   if (!session) redirect('/auth/login')
   
@@ -51,23 +53,23 @@ export default async function AuthorDashboard() {
       {/* Header */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div>
-          <div style={{ fontSize:20, fontWeight:800, letterSpacing:'-0.4px' }}>Author Overview</div>
+          <div style={{ fontSize:20, fontWeight:800, letterSpacing:'-0.4px' }}>{t('home')}</div>
           <div style={{ fontSize:12, color:'#635e80', fontFamily:"'JetBrains Mono',monospace", marginTop:2 }}>
             Welcome back, {session.user.name}
           </div>
         </div>
         <Link href="/author/books/new" style={{ padding:'8px 18px', borderRadius:6, background:'#9d7df5', color:'#0d0c10', fontSize:13, fontWeight:700, textDecoration:'none' }}>
-          + Create New Book
+          + {t('newBook')}
         </Link>
       </div>
 
       {/* Stats Grid */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14 }}>
         {[
-          { label:'Total Books',   value:bs.total||0,       color:'#9d7df5', sub:`${bs.published||0} published`, icon:'📚' },
+          { label:t('books'),   value:bs.total||0,       color:'#9d7df5', sub:`${bs.published||0} published`, icon:'📚' },
           { label:'Total Reads',   value:reads.toLocaleString(), color:'#5ba4f5', sub:`Across all titles`,   icon:'👁' },
-          { label:'Total Revenue', value:`$${parseFloat(rs.total_revenue||0).toFixed(2)}`, color:'#3dd6a3', sub:`$${parseFloat(rs.month_revenue||0).toFixed(2)} this month`, icon:'💰' },
-          { label:'In Review',     value:bs.in_review||0,   color:'#f07060', sub:`Pending approval`,      icon:'⏳' },
+          { label:t('revenue'), value:`$${parseFloat(rs.total_revenue||0).toFixed(2)}`, color:'#3dd6a3', sub:`$${parseFloat(rs.month_revenue||0).toFixed(2)} this month`, icon:'💰' },
+          { label:t('status'),     value:bs.in_review||0,   color:'#f07060', sub:`Pending approval`,      icon:'⏳' },
         ].map(s => (
           <div key={s.label} style={{ background:'#151420', border:'1px solid #272635', borderRadius:10, padding:'18px 20px', position:'relative' }}>
             <div style={{ position:'absolute', top:16, right:16, fontSize:18, opacity:0.3 }}>{s.icon}</div>

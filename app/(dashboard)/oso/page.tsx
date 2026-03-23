@@ -4,8 +4,10 @@ import pool                 from '@/lib/db'
 import Link                 from 'next/link'
 import UserStatusAction     from '@/components/oso/UserStatusAction'
 import PartnerApproval      from '@/components/oso/PartnerApproval'
+import { getTranslations }  from '@/lib/i18n/server'
 
 export default async function OsoDashboard() {
+  const t = getTranslations()
   const session = await getServerSession(authOptions)
 
   // All queries in parallel
@@ -83,7 +85,7 @@ export default async function OsoDashboard() {
       {/* Topbar */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div>
-          <div style={{ fontSize:20, fontWeight:800, color:'#f0efe8', letterSpacing:'-0.4px' }}>Command Center</div>
+          <div style={{ fontSize:20, fontWeight:800, color:'#f0efe8', letterSpacing:'-0.4px' }}>{t('commandCenter')}</div>
           <div style={{ fontSize:12, color:'#6b6b78', fontFamily:"'JetBrains Mono',monospace", marginTop:2 }}>
             {new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
           </div>
@@ -103,10 +105,10 @@ export default async function OsoDashboard() {
       {/* Stats */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14 }}>
         {[
-          { label:'Total Users',    value:us.total,            color:'#e8c547', sub:`+${us.new_month} this month`,  icon:'👥' },
-          { label:'Books Published',value:bs.published,        color:'#3dd6a3', sub:`${bs.in_review} in review`,    icon:'📚' },
-          { label:'Platform Revenue',value:`$${parseFloat(rs.platform_revenue||0).toLocaleString()}`, color:'#9d7df5', sub:`$${parseFloat(rs.month_revenue||0).toFixed(0)} this month`, icon:'💰' },
-          { label:'Action Needed',  value:Number(ps.pending_partners)+Number(ps.books_review)+Number(ps.pending_users), color:'#f07060', sub:`${ps.books_review} books · ${ps.pending_partners} partners`, icon:'⏳' },
+          { label:t('totalUsers'),    value:us.total,            color:'#e8c547', sub:`+${us.new_month} this month`,  icon:'👥' },
+          { label:t('booksPublished'),value:bs.published,        color:'#3dd6a3', sub:`${bs.in_review} in review`,    icon:'📚' },
+          { label:t('platformRevenue'),value:`$${parseFloat(rs.platform_revenue||0).toLocaleString()}`, color:'#9d7df5', sub:`$${parseFloat(rs.month_revenue||0).toFixed(0)} this month`, icon:'💰' },
+          { label:t('actionNeeded'),  value:Number(ps.pending_partners)+Number(ps.books_review)+Number(ps.pending_users), color:'#f07060', sub:`${ps.books_review} books · ${ps.pending_partners} partners`, icon:'⏳' },
         ].map(s => (
           <div key={s.label} style={{ background:'#131316', border:'1px solid #2a2a32', borderRadius:10, padding:'18px 20px', position:'relative', overflow:'hidden' }}>
             <div style={{ position:'absolute', top:16, right:16, fontSize:18, opacity:0.4 }}>{s.icon}</div>

@@ -1,0 +1,423 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.oso{font-family:var(--font-sans);width:100%}
+.progress{height:3px;background:var(--color-border-tertiary);border-radius:2px;overflow:hidden}
+.pfill{height:100%;background:#534AB7;border-radius:2px;transition:width .4s ease}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);min-height:500px;padding:40px 44px 34px;position:relative;overflow:hidden}
+.slide{display:none}
+.slide.active{display:block;animation:si .3s ease}
+@keyframes si{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.snum{position:absolute;top:16px;right:20px;font-size:11px;color:var(--color-text-tertiary);letter-spacing:.05em}
+.stag{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:16px}
+.big{font-size:52px;font-weight:500;line-height:1.05;color:var(--color-text-primary);margin-bottom:8px}
+.tagline{font-size:15px;color:var(--color-text-secondary);letter-spacing:.04em;margin-bottom:6px}
+.title{font-size:24px;font-weight:500;line-height:1.3;color:var(--color-text-primary);margin-bottom:12px}
+.sub{font-size:14px;line-height:1.75;color:var(--color-text-secondary);max-width:560px}
+.bar{width:40px;height:3px;background:#534AB7;border-radius:2px;margin:18px 0 22px}
+.bar.red{background:#A32D2D}
+.acc{color:#534AB7}.acc2{color:#1D9E75}.acca{color:#BA7517}.accr{color:#A32D2D}
+.gr3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+.gr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:16px}
+.bnum{font-size:26px;font-weight:500;color:#534AB7;display:block;line-height:1}
+.blbl{font-size:12px;color:var(--color-text-secondary);margin-top:6px;line-height:1.5}
+.ftitle{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:9px 0 5px}
+.fdesc{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.ficon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;margin:3px 3px 0 0}
+.bp{background:#EEEDFE;color:#3C3489}.bc{background:#FAECE7;color:#712B13}.bt{background:#E1F5EE;color:#085041}.ba{background:#FAEEDA;color:#633806}.br{background:#FCEBEB;color:#791F1F}.bg{background:#EAF3DE;color:#27500A}
+.gitem{display:flex;align-items:flex-start;gap:11px;border-radius:var(--border-radius-md);padding:12px 14px}
+.gitem.gz{background:var(--color-background-secondary)}.gitem.ga{background:#FDF5E6}
+.gdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.gdot.gz{background:#534AB7}.gdot.ga{background:#BA7517}
+.gtext{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.gtext b{color:var(--color-text-primary);font-weight:500}
+.stk{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:16px}
+.shead{font-size:13px;font-weight:500;padding-bottom:10px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:9px}
+.si{font-size:13px;color:var(--color-text-secondary);padding:2px 0;line-height:1.5}
+.si::before{content:"→ ";color:#534AB7;font-weight:500}
+.flow{display:flex;align-items:stretch;gap:0;margin:22px 0 18px;overflow-x:auto}
+.fnode{flex:1;min-width:80px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px 10px;text-align:center}
+.fnode.main{background:#534AB7}
+.fnode.main .fn{color:#CECBF6}.fnode.main .ft{color:#fff}.fnode.main .fs{color:#AFA9EC}
+.farrow{display:flex;align-items:center;padding:0 2px;color:var(--color-text-tertiary);font-size:16px;flex-shrink:0}
+.fn{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-tertiary);margin-bottom:5px}
+.ft{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.fs{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.pcard{border-radius:var(--border-radius-md);padding:16px 18px;border:0.5px solid var(--color-border-tertiary)}
+.pcard.friend{border-left:3px solid #534AB7}.pcard.pop{border-left:3px solid #D85A30}.pcard.online{border-left:3px solid #1D9E75}
+.ptype{font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:500;margin-bottom:6px}
+.ptype.friend{color:#534AB7}.ptype.pop{color:#D85A30}.ptype.online{color:#1D9E75}
+.ptitle{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px}
+.pdesc{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.revrow{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:8px}
+.revicon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.revtitle{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.revdesc{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.revpct{margin-left:auto;font-size:18px;font-weight:500;color:#534AB7;flex-shrink:0}
+.promowrap{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:18px;margin-top:18px}
+.promohead{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:14px}
+.promorow{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.promo-code{font-family:var(--font-mono);font-size:13px;font-weight:500;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:6px;padding:5px 12px;color:#534AB7;letter-spacing:.08em}
+.promo-disc{font-size:12px;padding:3px 10px;border-radius:20px}
+.p-pct{background:#EEEDFE;color:#3C3489}.p-flat{background:#E1F5EE;color:#085041}.p-free{background:#FAEEDA;color:#633806}
+.promo-desc{font-size:12px;color:var(--color-text-secondary)}
+.steps{margin-top:18px}
+.step{display:flex;align-items:flex-start;gap:13px;margin-bottom:12px}
+.stepnum{width:22px;height:22px;border-radius:50%;background:#534AB7;color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.steptxt{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.steptxt b{color:var(--color-text-primary);font-weight:500}
+.cbox{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:24px;text-align:center;margin-top:20px}
+.ctitle{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px}
+.csub{font-size:14px;color:var(--color-text-secondary);margin-bottom:20px;line-height:1.6}
+.cbtn{display:inline-block;padding:10px 22px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.cpri{background:#534AB7;color:#fff;border:none}.cpri:hover{background:#3C3489}
+.csec{background:var(--color-background-primary);color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary)}.csec:hover{border-color:var(--color-border-primary)}
+.brand-strip{display:inline-flex;align-items:center;gap:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:7px 14px;margin-top:20px}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:#534AB7}
+.brand-full{font-size:12px;color:var(--color-text-secondary);letter-spacing:.03em}
+.brand-full span{color:var(--color-text-primary);font-weight:500}
+.mission{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:20px 22px;margin-top:20px;border-left:3px solid #534AB7}
+.mission-q{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-tertiary);margin-bottom:8px}
+.mission-txt{font-size:15px;font-weight:500;color:var(--color-text-primary);line-height:1.6}
+.mission-sub{font-size:13px;color:var(--color-text-secondary);margin-top:8px;line-height:1.6}
+
+/* ── SECURITY STYLES ── */
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.sec-card{border-radius:var(--border-radius-md);padding:16px 18px;border:0.5px solid var(--color-border-tertiary);position:relative;overflow:hidden}
+.sec-card.active-now{border-left:3px solid #A32D2D}
+.sec-card.coming{border-left:3px solid #534AB7;opacity:.85}
+.sec-layer{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:500;margin-bottom:7px}
+.sec-layer.now{color:#A32D2D}
+.sec-layer.soon{color:#534AB7}
+.sec-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px}
+.sec-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.55}
+.sec-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;margin-top:8px}
+.sec-tag.live{background:#FCEBEB;color:#791F1F}
+.sec-tag.planned{background:#EEEDFE;color:#3C3489}
+.threat-row{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin-bottom:8px}
+.threat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.threat-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.threat-desc{font-size:12px;color:var(--color-text-secondary);margin-top:2px;line-height:1.5}
+.threat-fix{margin-left:auto;font-size:11px;padding:3px 9px;border-radius:10px;flex-shrink:0;white-space:nowrap}
+.fix-live{background:#E1F5EE;color:#085041}
+.fix-plan{background:#EEEDFE;color:#3C3489}
+.roadmap{margin-top:20px}
+.rm-phase{display:flex;gap:14px;margin-bottom:10px;align-items:flex-start}
+.rm-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:0}
+.rm-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.rm-dot.done{background:#1D9E75}
+.rm-dot.now{background:#A32D2D}
+.rm-dot.next{background:#534AB7}
+.rm-dot.future{background:var(--color-border-secondary)}
+.rm-line{width:1px;background:var(--color-border-tertiary);flex:1;min-height:18px;margin-top:2px}
+.rm-phase-title{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.rm-phase-desc{font-size:12px;color:var(--color-text-secondary);margin-top:2px;line-height:1.5}
+.rm-label{font-size:11px;padding:2px 8px;border-radius:10px;display:inline-block;margin-top:4px}
+.rm-done{background:#E1F5EE;color:#085041}
+.rm-now{background:#FCEBEB;color:#791F1F}
+.rm-next{background:#EEEDFE;color:#3C3489}
+.rm-future{background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+
+.nav{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.dots{display:flex;gap:5px;align-items:center}
+.dot{width:6px;height:6px;border-radius:3px;background:var(--color-border-secondary);cursor:pointer;transition:all .2s;border:none;padding:0}
+.dot.active{width:20px;background:#534AB7}
+.nbtn{font-size:13px;color:var(--color-text-secondary);background:none;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:7px 15px;cursor:pointer;transition:all .15s}
+.nbtn:hover:not(:disabled){color:var(--color-text-primary);border-color:var(--color-border-primary)}
+.nbtn:disabled{opacity:.3;cursor:default}
+@media(max-width:600px){
+.gr3,.gr2,.sec-grid{grid-template-columns:1fr}.big{font-size:36px}.card{padding:24px 18px 20px}
+.flow{flex-direction:column;gap:4px}.threat-fix{display:none}
+}
+</style>
+
+<div class="oso">
+<div class="progress"><div class="pfill" id="pf" style="width:7.7%"></div></div>
+<div class="card">
+
+<!-- 01 Hero -->
+<div class="slide active" id="s0">
+<span class="snum">01 / 13</span>
+<div class="stag">Business Presentation · E-book Platform</div>
+<h1 class="big"><span class="acc">OSO</span></h1>
+<div class="tagline">Optimize Systems, Optimize Life</div>
+<div class="bar"></div>
+<p class="sub">An e-book platform connecting authors, partners, and readers — with digital asset protection built into every layer of the system.</p>
+<div class="brand-strip"><div class="brand-dot"></div><span class="brand-full"><span>O</span>ptimize Systems, <span>O</span>ptimize Life</span></div>
+<div style="margin-top:16px">
+<span class="badge bp">E-book Platform</span>
+<span class="badge bc">Gen Z · Born 1997–2012</span>
+<span class="badge ba">Gen Alpha · Born 2013+</span>
+<span class="badge br">Protected Digital Assets</span>
+</div>
+</div>
+
+<!-- 02 Mission -->
+<div class="slide" id="s1">
+<span class="snum">02 / 13</span>
+<div class="stag">Our mission</div>
+<h2 class="title">Why OSO exists</h2>
+<div class="bar"></div>
+<p class="sub">The name says it all — OSO believes that when you optimize the systems around you, you optimize your life. Reading is the most powerful system of all.</p>
+<div class="mission">
+<div class="mission-q">Brand meaning</div>
+<div class="mission-txt">"Optimize Systems, Optimize Life"</div>
+<div class="mission-sub">OSO optimizes the reading system end-to-end — from how authors publish, to how partners sell, to how readers discover. Every piece is secured so the whole system runs without friction or fear.</div>
+</div>
+<div style="margin-top:18px">
+<span class="badge bp">Knowledge is a system</span>
+<span class="badge bt">Reading = life optimization</span>
+<span class="badge br">Security = trust foundation</span>
+</div>
+</div>
+
+<!-- 03 Opportunity -->
+<div class="slide" id="s2">
+<span class="snum">03 / 13</span>
+<div class="stag">The opportunity</div>
+<h2 class="title">Two generations. One massive market.</h2>
+<div class="bar"></div>
+<p class="sub">Gen Z and Gen Alpha together represent over 4 billion people — and no e-book platform is truly designed for how they read, share, and grow.</p>
+<div class="gr3">
+<div class="box"><span class="bnum">4B+</span><span class="blbl">Combined Gen Z & Alpha global population</span></div>
+<div class="box"><span class="bnum">$18B+</span><span class="blbl">Digital book market projected by 2027</span></div>
+<div class="box"><span class="bnum">76%</span><span class="blbl">Young readers prefer digital over physical books</span></div>
+</div>
+<div style="margin-top:16px">
+<span class="badge bp">Gen Z: ages 13–28 today</span><span class="badge ba">Gen Alpha: ages 0–12 today</span>
+</div>
+</div>
+
+<!-- 04 Business Model -->
+<div class="slide" id="s3">
+<span class="snum">04 / 13</span>
+<div class="stag">Business model</div>
+<h2 class="title">Three players, one ecosystem</h2>
+<div class="bar"></div>
+<div class="flow">
+<div class="fnode" style="border-left:3px solid #534AB7"><div class="fn">Producer</div><div class="ft">Author</div><div class="fs">Creates content</div></div>
+<div class="farrow">↔</div>
+<div class="fnode" style="border-left:3px solid #D85A30"><div class="fn">Shop Owner</div><div class="ft">Partner</div><div class="fs">Curates & sells</div></div>
+<div class="farrow">→</div>
+<div class="fnode main"><div class="fn">Platform</div><div class="ft">OSO</div><div class="fs">Authenticates</div></div>
+<div class="farrow">→</div>
+<div class="fnode" style="border-left:3px solid #1D9E75"><div class="fn">Readers</div><div class="ft">Users</div><div class="fs">Gen Z + Alpha</div></div>
+</div>
+<p class="sub" style="font-size:13px">Authors produce content. Partners curate digital storefronts. OSO authenticates and delivers. Every transaction is protected — no piracy, no bots, no fake views.</p>
+<div style="margin-top:14px;display:flex;gap:7px;flex-wrap:wrap">
+<span class="badge bp">Author ↔ Partner collab</span><span class="badge bc">Partner-curated shops</span><span class="badge bt">OSO as the backbone</span><span class="badge br">Protected at every step</span>
+</div>
+</div>
+
+<!-- 05 Gen Z -->
+<div class="slide" id="s4">
+<span class="snum">05 / 13</span>
+<div class="stag">Target audience · Part 1</div>
+<h2 class="title"><span class="acc">Gen Z</span> — Born 1997–2012</h2>
+<div class="bar"></div>
+<p class="sub">Digital natives who read to level up — career, mindset, creativity. They also understand data privacy better than any generation before them.</p>
+<div class="gr2" style="margin-top:18px">
+<div class="gitem gz"><div class="gdot gz"></div><div class="gtext"><b>Self-optimization mindset</b> — read to grow, learn skills, and get ahead</div></div>
+<div class="gitem gz"><div class="gdot gz"></div><div class="gtext"><b>Privacy-aware</b> — care deeply about how their data is used and stored</div></div>
+<div class="gitem gz"><div class="gdot gz"></div><div class="gtext"><b>Mobile-first</b> — 89% read on smartphones, not desktops</div></div>
+<div class="gitem gz"><div class="gdot gz"></div><div class="gtext"><b>Promo-responsive</b> — discount codes and limited offers convert fast</div></div>
+<div class="gitem gz"><div class="gdot gz"></div><div class="gtext"><b>Community-driven</b> — BookTok, reading clubs, social reviews</div></div>
+<div class="gitem gz"><div class="gdot gz"></div><div class="gtext"><b>Peer-influenced</b> — friend referrals beat any ad campaign</div></div>
+</div>
+</div>
+
+<!-- 06 Gen Alpha -->
+<div class="slide" id="s5">
+<span class="snum">06 / 13</span>
+<div class="stag">Target audience · Part 2</div>
+<h2 class="title"><span class="acca">Gen Alpha</span> — Born 2013+</h2>
+<div class="bar"></div>
+<p class="sub">AI-native, visual, and already building habits. Parents pay and trust OSO to keep their child's data completely safe.</p>
+<div class="gr2" style="margin-top:18px">
+<div class="gitem ga"><div class="gdot ga"></div><div class="gtext"><b>AI-native learners</b> — comfortable with smart, adaptive content</div></div>
+<div class="gitem ga"><div class="gdot ga"></div><div class="gtext"><b>Parent-mediated</b> — parents choose & pay; kids discover & read</div></div>
+<div class="gitem ga"><div class="gdot ga"></div><div class="gtext"><b>Visual & interactive</b> — bite-sized chapters, gamified progress</div></div>
+<div class="gitem ga"><div class="gdot ga"></div><div class="gtext"><b>Child data protection</b> — COPPA-aligned, zero ad targeting on minors</div></div>
+<div class="gitem ga"><div class="gdot ga"></div><div class="gtext"><b>Safe space required</b> — age-gated, curated, child-safe content</div></div>
+<div class="gitem ga"><div class="gdot ga"></div><div class="gtext"><b>Habits form young</b> — early loyalty to OSO lasts a lifetime</div></div>
+</div>
+</div>
+
+<!-- 07 Partnership -->
+<div class="slide" id="s6">
+<span class="snum">07 / 13</span>
+<div class="stag">Partnership strategy</div>
+<h2 class="title">How to find the right partners</h2>
+<div class="bar"></div>
+<p class="sub">Start close, grow wide. OSO's partnership model scales from friends to pop-up events to online communities — all verified through OSO's auth system.</p>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:18px">
+<div class="pcard friend"><div class="ptype friend">Tier 1 · Friends & community</div><div class="ptitle">Start with your circle</div><div class="pdesc">Invite friends who run small businesses, book clubs, or content pages. Low barrier, high trust — perfect for testing the OSO model and collecting early feedback.</div></div>
+<div class="pcard pop"><div class="ptype pop">Tier 2 · Pop-up & event shops</div><div class="ptitle">Go where the readers are</div><div class="pdesc">Book fairs, school events, art markets. Partners scan a QR code to activate their OSO shop on the spot — instant setup, real-world discovery.</div></div>
+<div class="pcard online"><div class="ptype online">Tier 3 · Online & creator partners</div><div class="ptitle">Scale through digital channels</div><div class="pdesc">Bookstagrammers, BookTok creators, Discord reading communities, indie publishers — turning their audience into OSO readers.</div></div>
+</div>
+</div>
+
+<!-- 08 Revenue -->
+<div class="slide" id="s7">
+<span class="snum">08 / 13</span>
+<div class="stag">Revenue model</div>
+<h2 class="title">How OSO makes money</h2>
+<div class="bar"></div>
+<p class="sub">Every book sale flows through OSO. We charge a percentage — authors earn, partners earn, OSO grows. No sale, no fee.</p>
+<div style="margin-top:20px">
+<div class="revrow"><div class="revicon" style="background:#EEEDFE"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#534AB7" stroke-width="1.5"/><path d="M5 8h6M5 5.5h6M5 10.5h4" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><div class="revtitle">Author royalty</div><div class="revdesc">Author earns per book sold through any partner shop</div></div><div class="revpct">~70%</div></div>
+<div class="revrow"><div class="revicon" style="background:#FAECE7"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 12V6l5-4 5 4v6" stroke="#993C1D" stroke-width="1.5" stroke-linejoin="round"/><rect x="6" y="9" width="4" height="3" rx="1" stroke="#993C1D" stroke-width="1.2"/></svg></div><div><div class="revtitle">Partner commission</div><div class="revdesc">Partner earns for every sale made through their shop</div></div><div class="revpct">~15%</div></div>
+<div class="revrow" style="border:0.5px solid var(--color-border-secondary)"><div class="revicon" style="background:#E1F5EE"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#0F6E56" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><div class="revtitle">OSO platform fee</div><div class="revdesc">OSO takes a cut from every transaction — automatically</div></div><div class="revpct" style="color:#1D9E75">~15%</div></div>
+</div>
+<p class="sub" style="font-size:12px;margin-top:12px">Percentages are illustrative and configurable per partner tier.</p>
+</div>
+
+<!-- 09 Promo Codes -->
+<div class="slide" id="s8">
+<span class="snum">09 / 13</span>
+<div class="stag">Partner tools</div>
+<h2 class="title">Partner promo codes & coupons</h2>
+<div class="bar"></div>
+<p class="sub">Partners get a dashboard to create custom promotions — driving sales and rewarding their community, with OSO's fraud detection watching every code use.</p>
+<div class="promowrap">
+<div class="promohead">Sample partner promotions</div>
+<div class="promorow"><span class="promo-code">OSOFAIR20</span><span class="promo-disc p-pct">20% off</span><span class="promo-desc">Pop-up event exclusive — limited 48 hrs</span></div>
+<div class="promorow"><span class="promo-code">ALPHAREAD</span><span class="promo-disc p-free">1st book free</span><span class="promo-desc">Gen Alpha onboarding — new family accounts</span></div>
+<div class="promorow"><span class="promo-code">OPTIMIZE10</span><span class="promo-disc p-pct">10% off</span><span class="promo-desc">Partner's always-on loyalty code</span></div>
+<div class="promorow"><span class="promo-code">BUNDLEOSO</span><span class="promo-disc p-flat">Flat $2 off</span><span class="promo-desc">3+ books in one purchase — bundle deals</span></div>
+</div>
+<div style="margin-top:14px;display:flex;gap:7px;flex-wrap:wrap">
+<span class="badge bp">Partner-generated codes</span><span class="badge ba">Time-limited offers</span><span class="badge br">Abuse detection on every code</span>
+</div>
+</div>
+
+<!-- 10 What We Protect -->
+<div class="slide" id="s9">
+<span class="snum">10 / 13</span>
+<div class="stag">Digital asset protection</div>
+<h2 class="title">What OSO protects</h2>
+<div class="bar" style="background:#A32D2D"></div>
+<p class="sub">Every piece of value in the OSO ecosystem is protected. Authors' work, partners' shops, and users' data are all secured by design.</p>
+<div style="margin-top:20px">
+<div class="threat-row">
+<div class="threat-icon" style="background:#FCEBEB">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="13" rx="2" stroke="#A32D2D" stroke-width="1.5"/><path d="M6 6h4M6 9h2" stroke="#A32D2D" stroke-width="1.5" stroke-linecap="round"/></svg>
+</div>
+<div style="flex:1"><div class="threat-title">Book content & scripts</div><div class="threat-desc">Author's text, formatting scripts, and metadata are encrypted — not downloadable in raw form. Readers can read, not extract.</div></div>
+<span class="threat-fix fix-live">Live</span>
+</div>
+<div class="threat-row">
+<div class="threat-icon" style="background:#FAEEDA">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#BA7517" stroke-width="1.5"/><path d="M8 5v3M8 11v.5" stroke="#BA7517" stroke-width="1.5" stroke-linecap="round"/></svg>
+</div>
+<div style="flex:1"><div class="threat-title">Auto-bot view inflation</div><div class="threat-desc">OSO detects and blocks automated bots from inflating book view counts, read counts, or revenue analytics — protecting fair pay for authors.</div></div>
+<span class="threat-fix fix-live">Live</span>
+</div>
+<div class="threat-row">
+<div class="threat-icon" style="background:#EEEDFE">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="4" y="7" width="8" height="7" rx="1.5" stroke="#534AB7" stroke-width="1.5"/><path d="M6 7V5a2 2 0 014 0v2" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/></svg>
+</div>
+<div style="flex:1"><div class="threat-title">Access credentials</div><div class="threat-desc">Encrypted login tokens, hashed passwords, and session expiry for all users — authors, partners, and readers. No plain-text credentials stored.</div></div>
+<span class="threat-fix fix-live">Live</span>
+</div>
+</div>
+</div>
+
+<!-- 11 Threat Defense -->
+<div class="slide" id="s10">
+<span class="snum">11 / 13</span>
+<div class="stag">Digital asset protection · Detail</div>
+<h2 class="title">Three threats OSO defends against</h2>
+<div class="bar" style="background:#A32D2D"></div>
+<p class="sub">OSO's security layer is built around three core attack surfaces — all protected from day one, with more layers coming.</p>
+<div class="sec-grid" style="margin-top:20px">
+<div class="sec-card active-now">
+<div class="sec-layer now">Threat 01 · Content theft</div>
+<div class="sec-title">Data & script protection</div>
+<div class="sec-desc">Book content is served as encrypted streams — not raw files. Copy-paste is disabled in the reader. Scripts and formatting code are obfuscated so content cannot be scraped or cloned.</div>
+<span class="sec-tag live">Protected now</span>
+</div>
+<div class="sec-card active-now">
+<div class="sec-layer now">Threat 02 · Fake engagement</div>
+<div class="sec-title">Anti-bot for view counts</div>
+<div class="sec-desc">Automated bots can fake reads, inflate rankings, and corrupt revenue. OSO fingerprints every session — headless browsers, rapid-fire reads, and suspicious patterns are flagged and blocked in real time.</div>
+<span class="sec-tag live">Protected now</span>
+</div>
+<div class="sec-card active-now">
+<div class="sec-layer now">Threat 03 · Account takeover</div>
+<div class="sec-title">Access credential security</div>
+<div class="sec-desc">All passwords are hashed. Sessions use short-lived encrypted tokens. Partners and authors get role-based access — a partner cannot see another partner's sales data or author earnings.</div>
+<span class="sec-tag live">Protected now</span>
+</div>
+<div class="sec-card coming">
+<div class="sec-layer soon">Coming next · Add-ons</div>
+<div class="sec-title">Future security layers</div>
+<div class="sec-desc">2FA for all accounts · DRM watermarking per reader · AI anomaly detection · Promo code abuse scoring · Child data compliance (COPPA/GDPR-K) · Partner fraud flagging</div>
+<span class="sec-tag planned">Roadmap</span>
+</div>
+</div>
+</div>
+
+<!-- 12 Security Roadmap -->
+<div class="slide" id="s11">
+<span class="snum">12 / 13</span>
+<div class="stag">Security roadmap</div>
+<h2 class="title">Building trust layer by layer</h2>
+<div class="bar" style="background:#A32D2D"></div>
+<p class="sub">Security at OSO is not a one-time feature — it's an evolving system. Each phase adds more protection for authors, partners, and readers.</p>
+<div class="roadmap">
+<div class="rm-phase">
+<div class="rm-dot-wrap"><div class="rm-dot done"></div><div class="rm-line"></div></div>
+<div><div class="rm-phase-title">Phase 1 — Foundation</div><div class="rm-phase-desc">Encrypted content delivery · Hashed credentials · Session token auth · Bot rate limiting</div><span class="rm-label rm-done">Live now</span></div>
+</div>
+<div class="rm-phase">
+<div class="rm-dot-wrap"><div class="rm-dot now"></div><div class="rm-line"></div></div>
+<div><div class="rm-phase-title">Phase 2 — Active protection</div><div class="rm-phase-desc">Real-time bot fingerprinting · Promo code abuse detection · Role-based access control · Copy-paste disable in reader</div><span class="rm-label rm-now">In progress</span></div>
+</div>
+<div class="rm-phase">
+<div class="rm-dot-wrap"><div class="rm-dot next"></div><div class="rm-line"></div></div>
+<div><div class="rm-phase-title">Phase 3 — Identity & compliance</div><div class="rm-phase-desc">2FA for all accounts · DRM watermark per reader copy · COPPA / GDPR-K compliance for Gen Alpha · Partner fraud scoring</div><span class="rm-label rm-next">Next up</span></div>
+</div>
+<div class="rm-phase">
+<div class="rm-dot-wrap"><div class="rm-dot future"></div></div>
+<div><div class="rm-phase-title">Phase 4 — AI security layer</div><div class="rm-phase-desc">AI anomaly detection across all transactions · Behavioral biometrics · Automated threat response · Security audit reports for enterprise partners</div><span class="rm-label rm-future">Future</span></div>
+</div>
+</div>
+</div>
+
+<!-- 13 CTA -->
+<div class="slide" id="s12">
+<span class="snum">13 / 13</span>
+<div class="stag">What's next</div>
+<h2 class="title">Optimize your business with OSO</h2>
+<div class="bar"></div>
+<p class="sub">Join the platform built for the next generation — with the security infrastructure to protect every author, partner, and reader in the ecosystem.</p>
+<div class="cbox">
+<div class="ctitle">Optimize Systems, Optimize Life</div>
+<div class="csub">Be a founding OSO partner. Curate your shelf, create your promo code, earn on every sale — and trust that your content and data are protected from day one.</div>
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<button class="cbtn cpri" onclick="sendPrompt('How does OSO protect author content from piracy and bots?')">Our Security ↗</button>
+<button class="cbtn csec" onclick="sendPrompt('How do I become an OSO partner and open my shop?')">Open My Shop ↗</button>
+</div>
+</div>
+<div style="text-align:center;margin-top:16px;font-size:12px;color:var(--color-text-tertiary)">OSO · Optimize Systems, Optimize Life</div>
+</div>
+
+</div>
+<div class="nav">
+<button class="nbtn" id="prv" onclick="go(-1)" disabled>← Prev</button>
+<div class="dots" id="dts"></div>
+<button class="nbtn" id="nxt" onclick="go(1)">Next →</button>
+</div>
+</div>
+
+<script>
+const sls=document.querySelectorAll('.slide'),dc=document.getElementById('dts'),pf=document.getElementById('pf');
+let c=0,n=sls.length;
+sls.forEach((_,i)=>{const d=document.createElement('button');d.className='dot'+(i===0?' active':'');d.onclick=()=>jmp(i);dc.appendChild(d);});
+function jmp(i){sls[c].classList.remove('active');dc.children[c].classList.remove('active');c=i;sls[c].classList.add('active');dc.children[c].classList.add('active');document.getElementById('prv').disabled=c===0;document.getElementById('nxt').disabled=c===n-1;pf.style.width=((c+1)/n*100)+'%';}
+function go(d){if(c+d>=0&&c+d<n)jmp(c+d);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+</script>

@@ -15,8 +15,8 @@ export async function GET(_: NextRequest, { params }: Params) {
   const [rows] = await pool.execute(
     `SELECT b.*, u.name AS author_name, p.name AS partner_name
      FROM books b
-     JOIN users u ON b.author_id  = u.id
-     JOIN users p ON b.partner_id = p.id
+     JOIN users u ON b.author_id = u.id
+     LEFT JOIN users p ON b.partner_id = p.id
      WHERE b.id = ? LIMIT 1`,
     [params.id]
   ) as any[]

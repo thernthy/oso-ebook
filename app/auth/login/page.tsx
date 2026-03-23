@@ -3,8 +3,11 @@
 import { useState, FormEvent } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 
 export default function LoginPage() {
+  const t = useLanguage().t
   const router       = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl  = searchParams.get('callbackUrl') || ''
@@ -55,21 +58,26 @@ export default function LoginPage() {
       <div style={styles.grid} />
 
       <div style={styles.card}>
+        {/* Language Switcher */}
+        <div style={{ position:'absolute', top:20, right:20 }}>
+          <LanguageSwitcher />
+        </div>
+
         {/* Logo */}
         <div style={styles.logoRow}>
           <div style={styles.logoIcon}>OS</div>
           <div>
             <div style={styles.logoText}>OSO Ebook</div>
-            <div style={styles.logoSub}>Platform Login</div>
+            <div style={styles.logoSub}>{t('login')}</div>
           </div>
         </div>
 
-        <h1 style={styles.heading}>Welcome back</h1>
-        <p style={styles.subheading}>Sign in to your account to continue</p>
+        <h1 style={styles.heading}>{t('welcomeBack')}</h1>
+        <p style={styles.subheading}>{t('signInToContinue')}</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.field}>
-            <label style={styles.label}>Email address</label>
+            <label style={styles.label}>{t('email')}</label>
             <input
               type="email"
               value={email}
@@ -84,7 +92,7 @@ export default function LoginPage() {
 
           <div style={styles.field}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-              <label style={styles.label}>Password</label>
+              <label style={styles.label}>{t('password')}</label>
               <span style={styles.forgot}>Forgot password?</span>
             </div>
             <input
@@ -110,7 +118,7 @@ export default function LoginPage() {
             disabled={loading}
             style={{ ...styles.submitBtn, opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? 'Signing in…' : 'Sign in →'}
+            {loading ? t('loading') : `${t('signIn')} →`}
           </button>
         </form>
 
