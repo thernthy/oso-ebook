@@ -35,6 +35,7 @@ export default async function PartnerLayout({ children }: { children: React.Reac
             { label:t('revenue'),       href:'/partner/revenue',          icon:'◈'  },
             { label:t('inviteAuthor'), href:`/partner/authors/invite`,    icon:'+' },
             { label:'Sessions', href:'/partner/sessions', icon:'◉' },
+            { label:'Settings', href:'/partner/settings', icon:'⊙' },
           ].map(item => (
             <Link key={item.href} href={item.href}
               style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 20px', color:'#5e6b70', fontSize:13, fontWeight:500, textDecoration:'none', borderLeft:'2px solid transparent' }}>
