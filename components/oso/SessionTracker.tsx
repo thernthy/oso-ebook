@@ -1,10 +1,37 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+
+interface UserInfo {
+  id: string
+  name: string
+  email: string
+  role: string
+}
 
 export default function SessionTracker() {
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
+
   useEffect(() => {
-    // Generate or retrieve session ID
+    // Get user info from session
+    fetch('/api/auth/session')
+      .then(r => r.json())
+      .then(j => {
+        if (j.user) {
+          setUserInfo({
+            id: j.user.id,
+            name: j.user.name,
+            email: j.user.email,
+            role: j.user.role
+          })
+        }
+      })
+      .catch(() => console.error('Failed to get session'))
+  }, [])
+
+  useEffect(() => {
+    if (!userInfo) return
+
     let id = sessionStorage.getItem('session_tracking_id')
     if (!id) {
       id = typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36).slice(2)
@@ -12,15 +39,17 @@ export default function SessionTracker() {
     }
 
     async function registerSession() {
+      if (!userInfo) return
       try {
         await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sessionId: id,
-            userId: 'current',
-            userName: 'User',
-            userRole: 'oso',
+            userId: userInfo.id,
+            userName: userInfo.name,
+            userRole: userInfo.role,
+            userEmail: userInfo.email,
             page: window.location.pathname
           })
         })
@@ -63,7 +92,7 @@ export default function SessionTracker() {
       removeSession()
       clearInterval(heartbeat)
     }
-  }, [])
+  }, [userInfo])
 
   return null
 }
