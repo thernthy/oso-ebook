@@ -1,7 +1,7 @@
 # OSO E-Book Platform — System Architecture
 
 > **Optimize Systems, Optimize Life**
-> Last updated: 2026-03-23
+> Last updated: 2026-03-23 (v2)
 
 ---
 
@@ -23,6 +23,12 @@
 14. [Partnership & Onboarding Flow](#14-partnership--onboarding-flow)
 15. [Security Architecture](#15-security-architecture)
 16. [Frontend Dashboards](#16-frontend-dashboards)
+17. [Real-Time Session Tracking](#15-real-time-session-tracking)
+18. [Logging System](#16-logging-system)
+19. [Security Architecture](#17-security-architecture)
+20. [Business Model Summary](#18-business-model-summary)
+21. [Roadmap](#19-roadmap)
+22. [Maintenance Mandate](#20-maintenance-mandate)
 17. [Business Model Summary](#17-business-model-summary)
 18. [Roadmap](#18-roadmap)
 19. [Maintenance Mandate](#19-maintenance-mandate)
@@ -213,8 +219,12 @@ oso-backend/
 │   │   │   ├── page.tsx          # Overview stats
 │   │   │   ├── analytics/        # Platform-wide metrics
 │   │   │   ├── books/            # All books management
-│   │   │   ├── partners/         # Partner management
+│   │   │   ├── partners/         # Partner management + applications
+│   │   │   ├── payouts/          # Payout management
 │   │   │   ├── revenue/          # Full financial ledger
+│   │   │   ├── sessions/         # Real-time session monitoring
+│   │   │   ├── logs/             # System logs viewer
+│   │   │   ├── ip-rules/         # IP block/allow rules
 │   │   │   ├── settings/         # Platform config (storage, splits)
 │   │   │   └── users/            # User management
 │   │   ├── partner/              # Partner dashboard
@@ -279,7 +289,8 @@ oso-backend/
 │   ├── oso/
 │   │   ├── PartnerApproval.tsx   # Partner application review
 │   │   ├── SettingsForm.tsx      # Platform settings editor
-│   │   └── UserStatusAction.tsx  # Suspend/activate users
+│   │   ├── UserStatusAction.tsx  # Suspend/activate users
+│   │   └── SessionTracker.tsx     # Real-time session tracking (SSE)
 │   └── reader/
 │       ├── BookReader.tsx        # Full-screen reading experience
 │       ├── PurchaseButton.tsx    # Buy / free access button
@@ -288,6 +299,7 @@ oso-backend/
 │
 ├── lib/                          # Core utilities
 │   ├── db.ts                     # MySQL pool singleton
+│   ├── session-store.ts          # In-memory session tracking (SSE real-time)
 │   ├── permissions.ts            # RBAC permission definitions
 │   ├── api-helpers.ts            # ok/err/requireAuth/requirePermission
 │   ├── storage.ts                # Local ↔ S3 storage abstraction
@@ -308,6 +320,8 @@ oso-backend/
 │   ├── 005_revenue.sql           # earnings, payouts + revenue split config
 │   ├── 006_reader.sql            # reader_preferences, reviews, bookmarks (extended)
 │   ├── 007_author_partner_reviews.sql # partner_codes, author_partner_relations, reviews
+│   ├── 008_ip_rules.sql          # ip_rules (block/allow IPs)
+│   ├── 009_logs.sql             # logs (info/warn/error/debug)
 │   └── schema.sql                # Full reference schema (PostgreSQL variant)
 │
 ├── types/
@@ -376,7 +390,8 @@ Browser Request
 /api/
 ├── auth/
 │   ├── [...nextauth]          NextAuth sign-in / sign-out / session
-│   └── accept-invite          POST: accept author invitation token
+│   ├── accept-invite/          Accept author invitation (GET + POST)
+│   └── login/                  Login page
 │
 ├── books/
 │   ├── route.ts               GET (role-scoped list) · POST (author creates)
@@ -408,6 +423,15 @@ Browser Request
 ├── users/
 │   ├── route.ts               GET (OSO: list) · POST (create)
 │   └── [id]/                  GET · PATCH · DELETE
+│
+├── sessions/
+│   └── route.ts               GET (list/SSE) · POST (register) · PATCH (update) · DELETE (remove)
+│
+├── ip-rules/
+│   └── route.ts               GET (list) · POST (add rule) · DELETE (remove rule)
+│
+├── logs/
+│   └── route.ts               GET (list with filters) · DELETE (clear old logs)
 │
 ├── purchases/
 │   └── route.ts               GET (reader library) · POST (buy book)
@@ -575,6 +599,18 @@ Browser Request
 │  status: pending|processing|completed|failed                            │
 │  reference  processed_by  processed_at                                  │
 └──────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                           ip_rules                                      │
+│  id  ip_address  action: block|allow  note  created_at                 │
+│  Used for IP-based access control (block/allow specific IPs)            │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                              logs                                       │
+│  id  level: info|warn|error|debug  message  context  created_at       │
+│  Application and system event logging                                   │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Full Table List
@@ -600,6 +636,8 @@ Browser Request
 | `partner_reviews` | Author's assessment of partners |
 | `partner_codes` | Partner referral/promo codes |
 | `platform_settings` | Runtime config (storage, revenue splits, limits) |
+| `ip_rules` | IP block/allow rules for access control |
+| `logs` | Application and system event logs |
 
 ---
 
@@ -815,12 +853,81 @@ AUTHOR-PARTNER RELATIONSHIP MANAGEMENT:
     active → paused → terminated
   Both sides can leave reviews:
     Partner reviews author: communication, quality, reliability, professionalism
-    Author reviews partner: support, fairness, communication
+     Author reviews partner: support, fairness, communication
 ```
 
 ---
 
-## 15. Security Architecture
+## 15. Real-Time Session Tracking
+
+### Session Monitoring (`/oso/sessions`)
+
+The platform includes real-time session monitoring using **Server-Sent Events (SSE)**:
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    Real-Time Session Flow                                 │
+│                                                                          │
+│  Browser ─────────────────────────────────────────────────────────────── │
+│    │                                                                    │
+│    ├─ POST /api/sessions (register on login/refresh)                   │
+│    │      { sessionId, userId, userName, userRole, userEmail, page }   │
+│    │                                                                    │
+│    ├─ PATCH /api/sessions (update on navigation/heartbeat every 30s)  │
+│    │      { sessionId, page }                                          │
+│    │                                                                    │
+│    └─ DELETE /api/sessions (remove on logout)                         │
+│           { sessionId }                                                 │
+│                                                                          │
+│  OSO Dashboard ──────────────────────────────────────────────────────── │
+│    │                                                                    │
+│    └─ GET /api/sessions?format=sse (SSE stream, updates every 3s)    │
+│           Returns: { type: 'sessions', sessions: [...] }               │
+│                                                                          │
+│  lib/session-store.ts ──────────────────────────────────────────────── │
+│    In-memory Map<sessionId, SessionData>                               │
+│    Auto-cleanup: sessions inactive >5 minutes are removed               │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+**Features:**
+- Live session cards showing user, role, IP, current page, connected time, last activity
+- Real-time updates via SSE (3-second polling)
+- Disconnect individual sessions or all sessions
+- Active/inactive status indicators
+
+---
+
+## 16. Logging System (`/oso/logs`)
+
+### Application Logging
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         Logging Architecture                              │
+│                                                                          │
+│  API Layer ──────────────────────────────────────────────────────────── │
+│    INSERT INTO logs (level, message, context)                            │
+│    Levels: info | warn | error | debug                                 │
+│                                                                          │
+│  OSO Dashboard ──────────────────────────────────────────────────────── │
+│    GET /api/logs?level=error&search=...                                │
+│    DELETE /api/logs?days=30 (clear old logs)                            │
+│                                                                          │
+│  Filters:                                                               │
+│    - By level (info, warn, error, debug)                               │
+│    - Search by message or context content                               │
+│    - Pagination (50 per page)                                           │
+│                                                                          │
+│  Retention:                                                              │
+│    Manual clear via UI (7d, 30d, 90d buttons)                          │
+│    or auto-cleanup via DELETE endpoint                                  │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 17. Security Architecture
 
 ### Current Security Layers (Live)
 
@@ -852,6 +959,12 @@ AUTHOR-PARTNER RELATIONSHIP MANAGEMENT:
 │  • Soft deletes preserve audit trail                                    │
 │  • account status: active|suspended|pending                            │
 └─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Layer 5: IP Access Control                                            │
+│  • IP block/allow rules via ip_rules table                            │
+│  • Configurable per-IP access control (individual + CIDR notation)      │
+│  • Managed via /oso/ip-rules dashboard                                 │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Security Roadmap
@@ -865,7 +978,7 @@ AUTHOR-PARTNER RELATIONSHIP MANAGEMENT:
 
 ---
 
-## 16. Frontend Dashboards
+## 18. Frontend Dashboards
 
 ### OSO Admin Dashboard (`/oso`)
 
@@ -873,8 +986,12 @@ AUTHOR-PARTNER RELATIONSHIP MANAGEMENT:
 /oso                    Platform overview stats
 /oso/analytics          User growth, revenue distribution, platform metrics
 /oso/books              All books across all partners (manage, feature, suspend)
-/oso/partners           Partner list, approve applications, manage status
+/oso/partners           Partner list + applications (approve/reject)
+/oso/payouts            Payout requests (process, complete, fail)
 /oso/revenue            Full financial ledger, top books, monthly chart
+/oso/sessions           Real-time active sessions (SSE updates, disconnect)
+/oso/logs               System logs viewer (info/warn/error/debug)
+/oso/ip-rules           IP block/allow rules management
 /oso/settings           Platform config: storage provider, revenue splits, limits
 /oso/users              All user accounts, suspend/activate
 ```
@@ -930,7 +1047,7 @@ AUTHOR-PARTNER RELATIONSHIP MANAGEMENT:
 
 ---
 
-## 17. Business Model Summary
+## 19. Business Model Summary
 
 ```
 Three-player ecosystem:
@@ -963,7 +1080,7 @@ Promo codes:
 
 ---
 
-## 18. Roadmap
+## 20. Roadmap
 
 ### Features
 
@@ -992,7 +1109,7 @@ Promo codes:
 
 ---
 
-## 19. Maintenance Mandate
+## 21. Maintenance Mandate
 
 > **CRITICAL:** Any update, architectural change, new feature, new table, new API route, or new component MUST be reflected in this `docs/ARCHITECTURE.md` file to guide future development and AI assistants.
 
