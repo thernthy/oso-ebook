@@ -65,7 +65,7 @@ export default function ReaderProfileSection() {
           endpoint = '/api/reader/reading-now'
           break
         case 'bookmarks':
-          endpoint = '/api/bookmarks'
+          endpoint = '/api/reader/bookmarks'
           break
         case 'borrowed':
           endpoint = '/api/reader/borrowed'
