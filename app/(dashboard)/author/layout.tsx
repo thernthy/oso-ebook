@@ -35,10 +35,12 @@ export default async function AuthorLayout({ children }: { children: React.React
             { label:t('home'),     href:'/author',              icon:'⬡' },
             { label:t('myBooks'),     href:'/author/books',         icon:'▭' },
             { label:t('newBook'),     href:'/author/books/new',     icon:'+' },
+            { label:'Followers',     href:'/author/followers',      icon:'👥' },
             { label:t('partners'),     href:'/author/partners',      icon:'🤝' },
             { label:'Reviews',     href:'/author/reviews',        icon:'⭐' },
             { label:'Earnings',    href:'/author/revenue',        icon:'◈' },
             { label:'Sessions',    href:'/author/sessions',        icon:'◉' },
+            { label:'Settings',    href:'/author/settings',        icon:'⚙️' },
           ].map(item => (
             <NavItem key={item.href} {...item} />
           ))}

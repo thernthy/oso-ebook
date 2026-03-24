@@ -91,6 +91,16 @@ export default function AccountPopup({ user, align = 'top' }: AccountPopupProps)
 
           {/* Menu Items */}
           <div style={{ padding: '8px 0' }}>
+            {user.role === 'reader' && (
+              <Link href={`/reader/profile/followed`} onClick={() => setIsOpen(false)} style={{ display: 'block', padding: '10px 16px', fontSize: 13, color: '#c4c2d6', textDecoration: 'none', transition: 'background .15s' }} className="menu-item">
+                Profile
+              </Link>
+            )}
+            {user.role === 'author' && (
+              <Link href={`/author/followers`} onClick={() => setIsOpen(false)} style={{ display: 'block', padding: '10px 16px', fontSize: 13, color: '#c4c2d6', textDecoration: 'none', transition: 'background .15s' }} className="menu-item">
+                Followers
+              </Link>
+            )}
             <Link href={`/${user.role}/settings`} onClick={() => setIsOpen(false)} style={{ display: 'block', padding: '10px 16px', fontSize: 13, color: '#c4c2d6', textDecoration: 'none', transition: 'background .15s' }} className="menu-item">
               Settings
             </Link>

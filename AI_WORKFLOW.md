@@ -1,10 +1,8 @@
+STEP work
+
 STEP plan
 READ requirements
 CONFIRM features
-
-STEP work
-IMPLEMENT features
-CREATE or UPDATE files
 
 STEP test
 RUN tests
