@@ -3,20 +3,34 @@ import pool                         from '@/lib/db'
 import { ok, err, requirePermission } from '@/lib/api-helpers'
 
 // ─── GET /api/admin/settings ──────────────────────────────────
-export async function GET() {
+export async function GET(req: NextRequest) {
   const { response } = await requirePermission('manage:platform')
   if (response) return response
 
-  const [rows] = await pool.execute(
-    'SELECT setting_key, value FROM platform_settings ORDER BY setting_key'
-  ) as any[]
+  const { searchParams } = new URL(req.url)
+  const key = searchParams.get('key')
+
+  let rows: any[]
+  if (key) {
+    const [result] = await pool.execute(
+      'SELECT setting_key, value FROM platform_settings WHERE setting_key = ?',
+      [key]
+    ) as any[]
+    rows = result
+  } else {
+    const [result] = await pool.execute(
+      'SELECT setting_key, value FROM platform_settings ORDER BY setting_key'
+    ) as any[]
+    rows = result
+  }
 
   const settings = Object.fromEntries(
     (rows as any[]).map((r: any) => [r.setting_key, r.value])
   )
 
-  // Mask secrets
-  if (settings['storage_s3_secret']) settings['storage_s3_secret'] = '••••••••'
+  if (!key && settings['storage_s3_secret']) {
+    settings['storage_s3_secret'] = '••••••••'
+  }
 
   return ok({ settings })
 }
@@ -38,6 +52,7 @@ export async function PATCH(req: NextRequest) {
     'cover_thumb_width', 'cover_thumb_height',
     'cover_formats', 'cover_max_mb',
     'revenue_author_pct', 'revenue_partner_pct', 'revenue_platform_pct',
+    'phone_prefix',
   ]
 
   // Validate revenue split adds to 100

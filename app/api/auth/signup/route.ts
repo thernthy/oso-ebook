@@ -5,7 +5,7 @@ import pool from '@/lib/db'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, email, password } = body
+    const { name, email, phone, password } = body
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12)
 
     const [result] = await pool.execute(
-      `INSERT INTO users (name, email, password, role, status, created_at, updated_at)
-       VALUES (?, ?, ?, 'reader', 'active', NOW(), NOW())`,
-      [name, email, hashedPassword]
+      `INSERT INTO users (name, email, phone, password, role, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, 'reader', 'active', NOW(), NOW())`,
+      [name, email, phone || null, hashedPassword]
     ) as any[]
 
     return NextResponse.json(

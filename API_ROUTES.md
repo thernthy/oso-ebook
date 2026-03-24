@@ -98,6 +98,18 @@ All responses follow this structure:
 
 ---
 
+## Platform Config
+
+| Method | Route                  | Permission | Description                       |
+|--------|------------------------|------------|-----------------------------------|
+| GET    | `/platform/config`     | public     | Get public platform settings      |
+
+**GET /platform/config?key=phone_prefix**
+
+Returns `{ success: true, settings: { phone_prefix: "+855" } }`
+
+---
+
 ## Coming in v0.3
 - `GET/POST /api/purchases` — reader book purchases
 - `GET/PATCH /api/progress/:bookId` — reading progress tracking

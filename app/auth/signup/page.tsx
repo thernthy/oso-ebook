@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
@@ -12,10 +12,23 @@ export default function SignupPage() {
 
   const [name,        setName]        = useState('')
   const [email,       setEmail]       = useState('')
+  const [phone,       setPhone]       = useState('')
+  const [phonePrefix, setPhonePrefix] = useState('+855')
   const [password,    setPassword]    = useState('')
   const [confirmPass, setConfirmPass] = useState('')
   const [error,       setError]       = useState('')
   const [loading,     setLoading]     = useState(false)
+
+  useEffect(() => {
+    fetch('/api/platform/config?key=phone_prefix')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.settings?.phone_prefix) {
+          setPhonePrefix(data.settings.phone_prefix)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -34,10 +47,11 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
+      const fullPhone = phone ? `${phonePrefix}${phone}` : ''
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, phone: fullPhone, password }),
       })
 
       const data = await res.json()
@@ -102,6 +116,22 @@ export default function SignupPage() {
               onFocus={e => Object.assign(e.target.style, styles.inputFocus)}
               onBlur={e => Object.assign(e.target.style, styles.input)}
             />
+          </div>
+
+          <div style={styles.field}>
+            <label style={styles.label}>Phone Number</label>
+            <div style={styles.phoneRow}>
+              <div style={styles.phonePrefix}>{phonePrefix}</div>
+              <input
+                type="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+                placeholder="12 345 678"
+                style={styles.phoneInput}
+                onFocus={e => Object.assign(e.target.style, styles.phoneInputFocus)}
+                onBlur={e => Object.assign(e.target.style, styles.phoneInput)}
+              />
+            </div>
           </div>
 
           <div style={styles.field}>
@@ -254,6 +284,44 @@ const styles: Record<string, React.CSSProperties> = {
     color:        '#9a9aa8',
     letterSpacing:'0.3px',
     fontFamily:   "'JetBrains Mono', monospace",
+  },
+  phoneRow: {
+    display:    'flex',
+    gap:        '8px',
+  },
+  phonePrefix: {
+    background:   '#1a1a1f',
+    border:       '1px solid #2a2a32',
+    borderRadius: '8px',
+    padding:      '11px 12px',
+    fontSize:     '14px',
+    color:        '#9a9aa8',
+    fontFamily:   "'JetBrains Mono', monospace",
+    minWidth:     '60px',
+    textAlign:    'center',
+  },
+  phoneInput: {
+    background:   '#1a1a1f',
+    border:       '1px solid #2a2a32',
+    borderRadius: '8px',
+    padding:      '11px 14px',
+    fontSize:     '14px',
+    color:        '#f0efe8',
+    outline:      'none',
+    width:        '100%',
+    fontFamily:   "'Syne', system-ui, sans-serif",
+    transition:   'border-color .15s',
+  },
+  phoneInputFocus: {
+    background:   '#1a1a1f',
+    border:       '1px solid #5ba4f5',
+    borderRadius: '8px',
+    padding:      '11px 14px',
+    fontSize:     '14px',
+    color:        '#f0efe8',
+    outline:      'none',
+    width:        '100%',
+    fontFamily:   "'Syne', system-ui, sans-serif",
   },
   input: {
     background:   '#1a1a1f',
