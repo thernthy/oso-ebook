@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
+import { authOptions }      from '@/lib/auth'
 import pool                 from '@/lib/db'
 import { notFound, redirect } from 'next/navigation'
 import BookReader           from '@/components/reader/BookReader'

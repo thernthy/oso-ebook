@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth'
-import { authOptions }      from '@/app/api/auth/[...nextauth]/route'
+import { authOptions }      from '@/lib/auth'
 import pool                 from '@/lib/db'
 import Link                 from 'next/link'
 import UserStatusAction     from '@/components/oso/UserStatusAction'
