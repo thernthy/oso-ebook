@@ -62,6 +62,11 @@ Access control is enforced via `middleware.ts` and per-route checks in API handl
 
 ## 6. Pages & Features
 
+### Auth Pages (`/auth`)
+- **Login** (`/auth/login`): Credential-based login with role-based dashboard redirect.
+- **Signup** (`/auth/signup`): Public reader registration with name, email, password.
+- **Accept Invite** (`/auth/accept-invite`): Token-based author onboarding from partner invitations.
+
 ### Partner Dashboard (`/partner`)
 - Overview stats: authors count, books in review, network reads, revenue.
 - Review queue for pending book submissions.

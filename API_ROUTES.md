@@ -81,6 +81,23 @@ All responses follow this structure:
 
 ---
 
+## Auth
+
+| Method | Route              | Permission | Description                    |
+|--------|--------------------|------------|--------------------------------|
+| POST   | `/auth/signup`     | public     | Register new reader account    |
+| GET    | `/auth/accept-invite` | public  | Verify invite token           |
+| POST   | `/auth/accept-invite` | public  | Complete author onboarding     |
+
+**POST /auth/signup body:**
+```json
+{ "name": "string", "email": "string", "password": "string" }
+```
+
+**Responses:** `201` success, `400` validation error, `409` email exists
+
+---
+
 ## Coming in v0.3
 - `GET/POST /api/purchases` — reader book purchases
 - `GET/PATCH /api/progress/:bookId` — reading progress tracking
