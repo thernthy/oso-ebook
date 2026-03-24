@@ -141,6 +141,12 @@ Access control is enforced via `middleware.ts` and per-route checks in API handl
 
 ## 10. Reader Features
 
+### Reader Library (`/reader/library`)
+- Lists all purchased books
+- Shows reading progress
+- Filter by: All, Reading, Completed
+- Stats: total books, reading, completed
+
 ### Reader Reading Experience (`/reader/read/[bookId]`)
 - Full-screen book reader with page-turn animation.
 - Themes: Dark, Light, Sepia.
