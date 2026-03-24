@@ -10,11 +10,11 @@ export async function GET(req: NextRequest) {
 
   const [rows] = await pool.execute(
     `SELECT bm.id, bm.book_id, b.title, b.cover_image_url as cover_url, 
-            c.title as chapter_title, c.chapter_num, bm.page_num, bm.note, bm.highlight, bm.created_at
+            c.title as chapter_title, c.chapter_num, bm.note, bm.created_at
      FROM bookmarks bm
      JOIN books b ON bm.book_id = b.id
      LEFT JOIN chapters c ON bm.chapter_id = c.id
-     WHERE bm.user_id = ?
+     WHERE bm.reader_id = (SELECT id FROM readers WHERE user_id = ?)
      ORDER BY bm.created_at DESC`,
     [userId]
   ) as any[]
