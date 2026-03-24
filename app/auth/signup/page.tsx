@@ -6,25 +6,35 @@ import Link from 'next/link'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 
+const DEFAULT_PREFIXES = ['+855', '+66', '+86']
+
 export default function SignupPage() {
   const t = useLanguage().t
   const router = useRouter()
 
-  const [name,        setName]        = useState('')
-  const [email,       setEmail]       = useState('')
-  const [phone,       setPhone]       = useState('')
-  const [phonePrefix, setPhonePrefix] = useState('+855')
-  const [password,    setPassword]    = useState('')
-  const [confirmPass, setConfirmPass] = useState('')
-  const [error,       setError]       = useState('')
-  const [loading,     setLoading]     = useState(false)
+  const [name,         setName]         = useState('')
+  const [email,        setEmail]        = useState('')
+  const [phone,        setPhone]        = useState('')
+  const [phonePrefix,  setPhonePrefix]  = useState('+855')
+  const [phoneOptions, setPhoneOptions] = useState<string[]>(DEFAULT_PREFIXES)
+  const [password,     setPassword]     = useState('')
+  const [confirmPass,  setConfirmPass]  = useState('')
+  const [error,        setError]        = useState('')
+  const [loading,      setLoading]      = useState(false)
 
   useEffect(() => {
     fetch('/api/platform/config?key=phone_prefix')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.settings?.phone_prefix) {
-          setPhonePrefix(data.settings.phone_prefix)
+          const prefixes = data.settings.phone_prefix
+            .split(',')
+            .map((p: string) => p.trim())
+            .filter((p: string) => p.startsWith('+'))
+          if (prefixes.length > 0) {
+            setPhoneOptions(prefixes)
+            setPhonePrefix(prefixes[0])
+          }
         }
       })
       .catch(() => {})
@@ -121,7 +131,15 @@ export default function SignupPage() {
           <div style={styles.field}>
             <label style={styles.label}>Phone Number</label>
             <div style={styles.phoneRow}>
-              <div style={styles.phonePrefix}>{phonePrefix}</div>
+              <select
+                value={phonePrefix}
+                onChange={e => setPhonePrefix(e.target.value)}
+                style={styles.phoneSelect}
+              >
+                {phoneOptions.map(prefix => (
+                  <option key={prefix} value={prefix}>{prefix}</option>
+                ))}
+              </select>
               <input
                 type="tel"
                 value={phone}
@@ -289,16 +307,16 @@ const styles: Record<string, React.CSSProperties> = {
     display:    'flex',
     gap:        '8px',
   },
-  phonePrefix: {
+  phoneSelect: {
     background:   '#1a1a1f',
     border:       '1px solid #2a2a32',
     borderRadius: '8px',
     padding:      '11px 12px',
     fontSize:     '14px',
-    color:        '#9a9aa8',
+    color:        '#f0efe8',
     fontFamily:   "'JetBrains Mono', monospace",
-    minWidth:     '60px',
-    textAlign:    'center',
+    cursor:       'pointer',
+    minWidth:     '70px',
   },
   phoneInput: {
     background:   '#1a1a1f',
