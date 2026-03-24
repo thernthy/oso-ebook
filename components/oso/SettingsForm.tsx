@@ -186,6 +186,25 @@ export default function SettingsForm({ initialSettings }: Props) {
         </div>
       </div>
 
+      {/* Registration settings */}
+      <div style={section}>
+        <div style={sectionHead}>👤 Reader Registration</div>
+        <div style={sectionBody}>
+          <div>
+            <label style={label}>Phone Country Code</label>
+            <input
+              value={settings.phone_prefix||'+855'}
+              onChange={e=>set('phone_prefix',e.target.value)}
+              style={{ ...inp, maxWidth: 140 }}
+              placeholder="+855"
+            />
+            <div style={{ fontSize:11, color:'#6b6b78', marginTop:4 }}>
+              Default prefix for reader phone numbers during signup (e.g., +855 for Cambodia, +66 for Thailand)
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Save */}
       {msg && (
         <div style={{ marginBottom:14, padding:'10px 14px', borderRadius:7, background: msg.startsWith('✓')?'rgba(61,214,163,0.08)':'rgba(240,112,96,0.08)', border:`1px solid ${msg.startsWith('✓')?'rgba(61,214,163,0.25)':'rgba(240,112,96,0.25)'}`, fontSize:12, fontFamily:"'JetBrains Mono',monospace", color: msg.startsWith('✓')?'#3dd6a3':'#f07060' }}>

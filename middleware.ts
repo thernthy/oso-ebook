@@ -56,7 +56,6 @@ export const config = {
     '/oso/:path*', 
     '/partner/:path*', 
     '/author/:path*', 
-    '/reader/:path*', 
-    '/auth/login'
+    '/reader/:path*',
   ],
 }
