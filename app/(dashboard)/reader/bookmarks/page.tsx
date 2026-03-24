@@ -8,20 +8,19 @@ export default async function BookmarksPage() {
   const userId  = session!.user.id
 
   const [bookmarks] = await pool.execute(
-    `SELECT bm.id, bm.page_num, bm.note, bm.highlight, bm.created_at,
+    `SELECT bm.id, bm.note, bm.created_at,
             b.id AS book_id, b.title AS book_title,
             u.name AS author_name,
             c.id AS chapter_id, c.title AS chapter_title, c.chapter_num
      FROM bookmarks bm
      JOIN books b    ON bm.book_id    = b.id
      JOIN users u    ON b.author_id   = u.id
-     JOIN chapters c ON bm.chapter_id = c.id
-     WHERE bm.user_id = ?
+     LEFT JOIN chapters c ON bm.chapter_id = c.id
+     WHERE bm.reader_id = (SELECT id FROM readers WHERE user_id = ?)
      ORDER BY bm.created_at DESC`,
     [userId]
   ) as any[]
 
-  // Group by book
   const byBook = (bookmarks as any[]).reduce((acc: any, bm: any) => {
     if (!acc[bm.book_id]) acc[bm.book_id] = { title: bm.book_title, author: bm.author_name, items: [] }
     acc[bm.book_id].items.push(bm)
@@ -60,11 +59,9 @@ export default async function BookmarksPage() {
                 <div style={{ fontSize:18, flexShrink:0, marginTop:2 }}>★</div>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:12, color:'#e8eaf8', fontWeight:600 }}>
-                    Ch.{bm.chapter_num} — {bm.chapter_title}
-                    <span style={{ color:'#5a5e80', fontFamily:"'JetBrains Mono',monospace", fontWeight:400, marginLeft:8 }}>p.{bm.page_num}</span>
+                    {bm.chapter_title ? `Ch.${bm.chapter_num} — ${bm.chapter_title}` : 'No chapter'}
                   </div>
                   {bm.note && <div style={{ fontSize:12, color:'#5a5e80', marginTop:4, fontStyle:'italic' }}>"{bm.note}"</div>}
-                  {bm.highlight && <div style={{ fontSize:12, color:'#e8c547', marginTop:4, background:'rgba(232,197,71,0.08)', padding:'4px 8px', borderRadius:4, borderLeft:'2px solid #e8c547' }}>"{bm.highlight}"</div>}
                   <div style={{ fontSize:10, color:'#5a5e80', fontFamily:"'JetBrains Mono',monospace", marginTop:4 }}>
                     {new Date(bm.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
                   </div>
