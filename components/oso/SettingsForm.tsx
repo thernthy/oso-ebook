@@ -44,7 +44,7 @@ export default function SettingsForm({ initialSettings }: Props) {
     fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.5px', marginBottom:6, display:'block',
   }
   const section: React.CSSProperties = {
-    background:'#131316', border:'1px solid #2a2a32', borderRadius:10, overflow:'hidden', marginBottom:16, maxWidth:900,
+    background:'#131316', border:'1px solid #2a2a32', borderRadius:10, overflow:'hidden', marginBottom:16,
   }
   const sectionHead: React.CSSProperties = {
     padding:'13px 18px', borderBottom:'1px solid #2a2a32',
@@ -88,7 +88,7 @@ export default function SettingsForm({ initialSettings }: Props) {
           )}
 
           {settings.storage_provider === 's3' && (
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
               {[
                 { key:'storage_s3_bucket',   label:'S3 Bucket',    placeholder:'my-ebook-bucket' },
                 { key:'storage_s3_region',   label:'Region',        placeholder:'us-east-1' },
@@ -110,7 +110,7 @@ export default function SettingsForm({ initialSettings }: Props) {
             </div>
           )}
 
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
             <div>
               <label style={label}>Max Upload Size (MB)</label>
               <input type="number" value={settings.max_upload_mb||'50'} onChange={e=>set('max_upload_mb',e.target.value)} style={inp} />
@@ -118,6 +118,15 @@ export default function SettingsForm({ initialSettings }: Props) {
             <div>
               <label style={label}>Allowed Formats</label>
               <input value={settings.allowed_formats||'pdf,epub,docx,txt'} onChange={e=>set('allowed_formats',e.target.value)} style={inp} placeholder="pdf,epub,docx,txt" />
+            </div>
+            <div>
+              <label style={label}>Phone Country Code</label>
+              <input
+                value={settings.phone_prefix||'+855'}
+                onChange={e=>set('phone_prefix',e.target.value)}
+                style={inp}
+                placeholder="+855"
+              />
             </div>
           </div>
         </div>
@@ -160,7 +169,7 @@ export default function SettingsForm({ initialSettings }: Props) {
       <div style={section}>
         <div style={sectionHead}>💰 Revenue Split</div>
         <div style={sectionBody}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:12 }}>
             {[
               { key:'revenue_author_pct',   label:'Author %',   color:'#9d7df5' },
               { key:'revenue_partner_pct',  label:'Partner %',  color:'#3dd6a3' },
@@ -182,25 +191,6 @@ export default function SettingsForm({ initialSettings }: Props) {
           </div>
           <div style={{ fontSize:12, color:'#6b6b78', lineHeight:1.6 }}>
             On a $10 book: Author gets <strong style={{color:'#9d7df5'}}>${(10*authorPct/100).toFixed(2)}</strong>, Partner gets <strong style={{color:'#3dd6a3'}}>${(10*partnerPct/100).toFixed(2)}</strong>, Platform keeps <strong style={{color:'#e8c547'}}>${(10*platformPct/100).toFixed(2)}</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* Registration settings */}
-      <div style={section}>
-        <div style={sectionHead}>👤 Reader Registration</div>
-        <div style={sectionBody}>
-          <div>
-            <label style={label}>Phone Country Code</label>
-            <input
-              value={settings.phone_prefix||'+855'}
-              onChange={e=>set('phone_prefix',e.target.value)}
-              style={{ ...inp, maxWidth: 140 }}
-              placeholder="+855"
-            />
-            <div style={{ fontSize:11, color:'#6b6b78', marginTop:4 }}>
-              Default prefix for reader phone numbers during signup (e.g., +855 for Cambodia, +66 for Thailand)
-            </div>
           </div>
         </div>
       </div>
