@@ -44,7 +44,7 @@ export default function SettingsForm({ initialSettings }: Props) {
     fontFamily:"'JetBrains Mono',monospace", letterSpacing:'0.5px', marginBottom:6, display:'block',
   }
   const section: React.CSSProperties = {
-    background:'#131316', border:'1px solid #2a2a32', borderRadius:10, overflow:'hidden', marginBottom:16,
+    background:'#131316', border:'1px solid #2a2a32', borderRadius:10, overflow:'hidden', marginBottom:16, maxWidth:900,
   }
   const sectionHead: React.CSSProperties = {
     padding:'13px 18px', borderBottom:'1px solid #2a2a32',
