@@ -29,7 +29,9 @@ export default function LibraryPage() {
     fetch('/api/purchases')
       .then(r => r.json())
       .then(d => {
-        if (d.success) setBooks(d.books)
+        if (d.success && d.data) {
+          setBooks(d.data.books || d.data || [])
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false))
