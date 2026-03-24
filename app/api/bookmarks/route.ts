@@ -1,5 +1,5 @@
-import { NextRequest }          from 'next/server'
-import pool                     from '@/lib/db'
+import { NextRequest } from 'next/server'
+import pool from '@/lib/db'
 import { ok, err, requireAuth } from '@/lib/api-helpers'
 
 export async function GET(req: NextRequest) {
@@ -7,25 +7,19 @@ export async function GET(req: NextRequest) {
   if (response) return response
 
   const userId = session!.user.id
-  const url    = new URL(req.url)
-  const bookId = url.searchParams.get('book_id') || ''
-
-  const conditions = ['bm.reader_id = (SELECT id FROM readers WHERE user_id = ?)']
-  const params: unknown[] = [userId]
-  if (bookId) { conditions.push('bm.book_id = ?'); params.push(bookId) }
 
   const [rows] = await pool.execute(
-    `SELECT bm.id, bm.book_id, bm.chapter_id, bm.note, bm.created_at,
-            b.title AS book_title, c.title AS chapter_title, c.chapter_num
+    `SELECT bm.id, bm.book_id, b.title, b.cover_image_url as cover_url, 
+            c.title as chapter_title, c.chapter_num, bm.note, bm.created_at
      FROM bookmarks bm
      JOIN books b ON bm.book_id = b.id
      LEFT JOIN chapters c ON bm.chapter_id = c.id
-     WHERE ${conditions.join(' AND ')}
+     WHERE bm.user_id = ?
      ORDER BY bm.created_at DESC`,
-    params
+    [userId]
   ) as any[]
 
-  return ok({ bookmarks: rows })
+  return ok(rows)
 }
 
 export async function POST(req: NextRequest) {
@@ -37,13 +31,13 @@ export async function POST(req: NextRequest) {
   const { book_id, chapter_id, note } = body
   if (!book_id || !chapter_id) return err('book_id and chapter_id required')
 
-  const [result] = await pool.execute(
-    `INSERT INTO bookmarks (reader_id, book_id, chapter_id, note)
-     SELECT id, ?, ?, ? FROM readers WHERE user_id = ?`,
-    [book_id, chapter_id, note || null, userId]
-  ) as any[]
+  await pool.execute(
+    `INSERT INTO bookmarks (user_id, book_id, chapter_id, note)
+     VALUES (?, ?, ?, ?)`,
+    [userId, book_id, chapter_id, note || null]
+  )
 
-  return ok({ message: 'Bookmark saved', id: (result as any).insertId }, 201)
+  return ok({ message: 'Bookmark saved' }, 201)
 }
 
 export async function DELETE(req: NextRequest) {
@@ -56,7 +50,7 @@ export async function DELETE(req: NextRequest) {
   if (!id) return err('id required')
 
   await pool.execute(
-    'DELETE FROM bookmarks WHERE id = ? AND reader_id = (SELECT id FROM readers WHERE user_id = ?)',
+    'DELETE FROM bookmarks WHERE id = ? AND user_id = ?',
     [id, userId]
   )
   return ok({ message: 'Bookmark removed' })

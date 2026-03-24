@@ -16,7 +16,7 @@ export default async function BookmarksPage() {
      JOIN books b    ON bm.book_id    = b.id
      JOIN users u    ON b.author_id   = u.id
      LEFT JOIN chapters c ON bm.chapter_id = c.id
-     WHERE bm.reader_id = (SELECT id FROM readers WHERE user_id = ?)
+     WHERE bm.user_id = ?
      ORDER BY bm.created_at DESC`,
     [userId]
   ) as any[]
