@@ -45,7 +45,7 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
       const startTime = Date.now()
       const duration = 500
 
-      function animate() {
+      const animate = () => {
         const elapsed = Date.now() - startTime
         const progress = Math.min(elapsed / duration, 1)
         
@@ -299,7 +299,7 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
                     backfaceVisibility: 'hidden',
                     boxShadow: `inset -5px 0 20px rgba(0,0,0,0.15)`,
                   }}>
-                    <img src={prevPageData.dataUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'rotateY(180deg)' }} />
+                    <img src={prevPageData.dataUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', transform: 'rotateY(180deg)' }} />
                   </div>
                 )}
                 
@@ -310,8 +310,10 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
                   transformOrigin: 'right center',
                   transition: flipDirection ? 'none' : 'transform 0.1s',
                   boxShadow: flipTransform ? `inset -${10 + flipProgress * 10}px 0 ${30 - flipProgress * 20}px rgba(0,0,0,${0.3 - flipProgress * 0.2})` : `inset -10px 0 30px rgba(0,0,0,0.15)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: '#fff',
                 }}>
-                  <img src={currentPageData.dataUrl} alt={`Page ${currentPage}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={currentPageData.dataUrl} alt={`Page ${currentPage}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                   {/* Page gradient for depth */}
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 85%, rgba(0,0,0,0.08))', pointerEvents: 'none' }} />
                 </div>
@@ -342,8 +344,8 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
                   opacity: 1,
                 }}>
                   {nextPageData ? (
-                    <>
-                      <img src={nextPageData.dataUrl} alt={`Page ${currentPage + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <>
+                    <img src={nextPageData.dataUrl} alt={`Page ${currentPage + 1}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to left, transparent 85%, rgba(0,0,0,0.06))', pointerEvents: 'none' }} />
                     </>
                   ) : (
@@ -363,7 +365,7 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
                     backfaceVisibility: 'hidden',
                     boxShadow: `inset 5px 0 20px rgba(0,0,0,0.1)`,
                   }}>
-                    <img src={currentPageData.dataUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'rotateY(180deg)' }} />
+                    <img src={currentPageData.dataUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', transform: 'rotateY(180deg)' }} />
                   </div>
                 )}
               </div>
