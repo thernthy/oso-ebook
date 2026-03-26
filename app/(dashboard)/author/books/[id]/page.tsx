@@ -118,14 +118,7 @@ export default async function BookDetailPage({ params }: Params) {
         </div>
 
         {/* Action buttons */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <AuthorBookPreview
-            bookId={params.id}
-            bookTitle={book.title}
-            chapters={chapters as any[]}
-          />
-          <BookActions book={book} chapterCount={(chapters as any[]).length} />
-        </div>
+        <BookActions book={book} chapterCount={(chapters as any[]).length} />
       </div>
 
       {/* Stats Row */}
@@ -163,6 +156,12 @@ export default async function BookDetailPage({ params }: Params) {
           />
           {/* Book file upload */}
           <BookUploadPanel bookId={params.id} bookStatus={book.status} latestFile={latestFile} />
+          {/* Preview button for book */}
+          <AuthorBookPreview
+            bookId={params.id}
+            bookTitle={book.title}
+            chapters={chapters as any[]}
+          />
           {/* File viewer for PDF */}
           <FileViewer bookId={params.id} />
           {/* Book settings */}
