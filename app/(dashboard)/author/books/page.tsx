@@ -16,7 +16,7 @@ export default async function AuthorBooksPage() {
 
   const [books] = await pool.execute(
     `SELECT b.id, b.title, b.status, b.price, b.is_free, b.total_reads,
-            b.created_at, b.cover_url, b.category, b.total_words,
+            b.created_at, b.cover_url,
             bf.status AS file_status
      FROM books b
      LEFT JOIN book_files bf ON bf.book_id = b.id
@@ -79,7 +79,7 @@ export default async function AuthorBooksPage() {
           <table style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead>
               <tr>
-                {['Title', 'Status', 'Words', 'Reads', 'Price', 'File', ''].map(h => (
+                {['Title', 'Status', 'Reads', 'Price', 'File', ''].map(h => (
                   <th key={h} style={{ padding:'10px 18px', textAlign:'left', fontSize:10, fontWeight:600, color:'#635e80', letterSpacing:'1.5px', textTransform:'uppercase', fontFamily:"'JetBrains Mono',monospace", borderBottom:'1px solid #272635', whiteSpace:'nowrap' }}>
                     {h}
                   </th>
@@ -99,9 +99,6 @@ export default async function AuthorBooksPage() {
                       <span style={{ padding:'3px 8px', borderRadius:4, fontSize:10, fontWeight:700, fontFamily:"'JetBrains Mono',monospace", background:s.bg, color:s.color }}>
                         {book.status.replace('_',' ')}
                       </span>
-                    </td>
-                    <td style={{ padding:'12px 18px', fontFamily:"'JetBrains Mono',monospace", fontSize:12, color:'#eeecf8' }}>
-                      {Number(book.total_words || 0).toLocaleString()}
                     </td>
                     <td style={{ padding:'12px 18px', fontFamily:"'JetBrains Mono',monospace", fontSize:12, color:'#eeecf8' }}>
                       {book.total_reads?.toLocaleString() || '0'}

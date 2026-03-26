@@ -94,10 +94,9 @@ export default async function BookDetailPage({ params }: Params) {
       </div>
 
       {/* Stats Row */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12 }}>
         {[
           { label:'Total Reads', value:book.total_reads?.toLocaleString() || '0', color:'#5ba4f5', icon:'👁' },
-          { label:'Words', value:(book.total_words as number)?.toLocaleString() || '0', color:'#3dd6a3', icon:'✎' },
           { label:'Readers', value:formatSessions(book.total_reading_sessions || 0), color:'#e8c547', icon:'👤' },
           { label:'Price', value:book.is_free ? 'Free' : `$${parseFloat(book.price || 0).toFixed(2)}`, color:'#3dd6a3', icon:'💰' },
         ].map(stat => (

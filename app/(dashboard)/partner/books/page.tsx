@@ -8,7 +8,7 @@ export default async function PartnerBooksPage() {
   const partnerId = session!.user.id
 
   const [inReview] = await pool.execute(
-    `SELECT b.id, b.title, b.description, b.category, b.created_at, b.total_words,
+    `SELECT b.id, b.title, b.description, b.category, b.created_at,
             u.name AS author_name, u.email AS author_email
      FROM books b
      JOIN users u ON b.author_id = u.id
@@ -19,7 +19,7 @@ export default async function PartnerBooksPage() {
 
   const [allBooks] = await pool.execute(
     `SELECT b.id, b.title, b.status, b.price, b.is_free,
-            b.total_reads, b.total_words, b.created_at,
+            b.total_reads, b.created_at,
             u.name AS author_name
      FROM books b
      JOIN users u ON b.author_id = u.id
@@ -68,7 +68,7 @@ export default async function PartnerBooksPage() {
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:14, fontWeight:700, color:'#edf0f0' }}>{book.title}</div>
                 <div style={{ fontSize:11, color:'#5e6b70', fontFamily:"'JetBrains Mono',monospace", marginTop:2 }}>
-                  {book.author_name} · {Number(book.total_words || 0).toLocaleString()} words
+                  {book.author_name}
                 </div>
                 {book.description && (
                   <div style={{ fontSize:12, color:'#5e6b70', marginTop:6, lineHeight:1.5, maxWidth:500 }}>
@@ -90,7 +90,7 @@ export default async function PartnerBooksPage() {
         <table style={{ width:'100%', borderCollapse:'collapse' }}>
           <thead>
             <tr>
-              {['Title','Author','Status','Words','Reads','Price'].map(h => (
+              {['Title','Author','Status','Reads','Price'].map(h => (
                 <th key={h} style={{ padding:'10px 18px', textAlign:'left', fontSize:10, fontWeight:600, color:'#5e6b70', letterSpacing:'1.5px', textTransform:'uppercase', fontFamily:"'JetBrains Mono',monospace", borderBottom:'1px solid #252c30' }}>{h}</th>
               ))}
             </tr>
@@ -107,7 +107,6 @@ export default async function PartnerBooksPage() {
                       {b.status.replace('_',' ')}
                     </span>
                   </td>
-                  <td style={{ padding:'11px 18px', fontSize:12, fontFamily:"'JetBrains Mono',monospace", color:'#edf0f0' }}>{Number(b.total_words || 0).toLocaleString()}</td>
                   <td style={{ padding:'11px 18px', fontSize:12, fontFamily:"'JetBrains Mono',monospace", color:'#edf0f0' }}>{b.total_reads?.toLocaleString()}</td>
                   <td style={{ padding:'11px 18px', fontSize:12, fontFamily:"'JetBrains Mono',monospace", color:'#3dd6a3' }}>
                     {b.is_free ? 'Free' : `$${parseFloat(b.price).toFixed(2)}`}
