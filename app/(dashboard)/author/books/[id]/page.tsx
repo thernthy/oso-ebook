@@ -4,10 +4,11 @@ import pool             from '@/lib/db'
 import { notFound }     from 'next/navigation'
 import Link             from 'next/link'
 import BookUploadPanel  from '@/components/author/BookUploadPanel'
-import BookActions     from '@/components/author/BookActions'
-import CoverUpload     from '@/components/author/CoverUpload'
-import BookSettings    from '@/components/author/BookSettings'
-import FileViewer      from '@/components/author/FileViewer'
+import BookActions      from '@/components/author/BookActions'
+import CoverUpload      from '@/components/author/CoverUpload'
+import BookSettings     from '@/components/author/BookSettings'
+import FileViewer       from '@/components/author/FileViewer'
+import BookPreview      from '@/components/author/BookPreview'
 
 type Params = { params: { id: string } }
 
@@ -89,8 +90,10 @@ export default async function BookDetailPage({ params }: Params) {
           )}
         </div>
 
-        {/* Action buttons */}
-        <BookActions book={book} />
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          <BookPreview bookId={params.id} bookTitle={book.title} />
+          <BookActions book={book} />
+        </div>
       </div>
 
       {/* Stats Row */}
@@ -115,8 +118,8 @@ export default async function BookDetailPage({ params }: Params) {
         </div>
       )}
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1.4fr', gap:20, alignItems:'start' }}>
-
+      {/* Full width content */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:20, alignItems:'start' }}>
         <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
           <CoverUpload
             bookId={params.id}
@@ -124,17 +127,11 @@ export default async function BookDetailPage({ params }: Params) {
             bookStatus={book.status}
           />
           <BookUploadPanel bookId={params.id} bookStatus={book.status} latestFile={latestFile} />
-          <FileViewer bookId={params.id} />
-          <BookSettings book={book} />
         </div>
 
-        {/* Placeholder for future content */}
-        <div style={{ background:'#151420', border:'1px solid #272635', borderRadius:10, padding:40, textAlign:'center' }}>
-          <div style={{ fontSize:48, marginBottom:16 }}>📚</div>
-          <div style={{ fontSize:16, fontWeight:700, color:'#eeecf8', marginBottom:8 }}>Book Content</div>
-          <div style={{ fontSize:13, color:'#635e80' }}>
-            Your book content will appear here after upload and processing.
-          </div>
+        <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+          <FileViewer bookId={params.id} />
+          <BookSettings book={book} />
         </div>
       </div>
     </div>
