@@ -7,20 +7,12 @@ import { ok, err }   from '@/lib/api-helpers'
 type Params = { params: { id: string } }
 
 export async function GET(_: NextRequest, { params }: Params) {
-  // First get the numeric book ID from uuid or id
-  const [books] = await pool.execute(
-    `SELECT id FROM books WHERE id = ? OR uuid = ? LIMIT 1`,
-    [params.id, params.id]
-  ) as any[]
-  const book = (books as any[])[0]
-  if (!book) return err('Book not found', 404)
-
   const [files] = await pool.execute(
     `SELECT bf.id, bf.format, bf.storage_key, bf.original_name
      FROM book_files bf
-     WHERE bf.book_id = ? AND bf.status = 'processed'
+     WHERE bf.book_id = ?
      ORDER BY bf.uploaded_at DESC LIMIT 1`,
-    [book.id]
+    [params.id]
   ) as any[]
 
   const file = (files as any[])[0]
