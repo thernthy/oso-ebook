@@ -288,6 +288,8 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
               <div style={{
                 position: 'absolute', left: 0, top: 0, width: '50%', height: '100%',
                 perspective: '1500px', perspectiveOrigin: 'right center', overflow: 'hidden', zIndex: 2,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: '#fff',
               }}>
                 {/* Back of previous page (visible during flip) */}
                 {flipDirection === 'backward' && prevPageData && (
@@ -298,6 +300,7 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
                     background: currentTheme.page,
                     backfaceVisibility: 'hidden',
                     boxShadow: `inset -5px 0 20px rgba(0,0,0,0.15)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     <img src={prevPageData.dataUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', transform: 'rotateY(180deg)' }} />
                   </div>
@@ -305,7 +308,7 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
                 
                 {/* Current page */}
                 <div style={{
-                  position: 'absolute', inset: 0,
+                  position: 'absolute', left: 0, top: 0, width: '100%', height: '100%',
                   transform: flipTransform ? `rotateY(${-flipTransform.rotateY}deg) translateX(${-flipTransform.translateX}px)` : 'rotateY(0deg)',
                   transformOrigin: 'right center',
                   transition: flipDirection ? 'none' : 'transform 0.1s',
@@ -334,10 +337,12 @@ export default function BookPreview({ bookId, bookTitle }: Props) {
               <div style={{
                 position: 'absolute', right: 0, top: 0, width: '50%', height: '100%',
                 perspective: '1500px', perspectiveOrigin: 'left center', overflow: 'hidden', zIndex: 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: '#fff',
               }}>
                 {/* Current right page */}
                 <div style={{
-                  position: 'absolute', inset: 0,
+                  position: 'absolute', right: 0, top: 0, width: '100%', height: '100%',
                   transform: flipTransform ? `rotateY(${-180 - flipTransform.rotateY}deg)` : 'rotateY(0deg)',
                   transformOrigin: 'left center',
                   transition: flipDirection ? 'none' : 'transform 0.1s',
