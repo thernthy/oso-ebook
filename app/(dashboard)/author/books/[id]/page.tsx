@@ -1,15 +1,13 @@
 import { getServerSession } from 'next-auth'
-import { authOptions }      from '@/lib/auth'
-import pool                 from '@/lib/db'
-import { notFound }         from 'next/navigation'
-import Link                 from 'next/link'
-import BookUploadPanel      from '@/components/author/BookUploadPanel'
-import ChapterList          from '@/components/author/ChapterList'
-import BookActions          from '@/components/author/BookActions'
-import CoverUpload          from '@/components/author/CoverUpload'
-import BookSettings         from '@/components/author/BookSettings'
-import FileViewer            from '@/components/author/FileViewer'
-import AuthorBookPreview    from '@/components/author/AuthorBookPreview'
+import { authOptions }  from '@/lib/auth'
+import pool             from '@/lib/db'
+import { notFound }     from 'next/navigation'
+import Link             from 'next/link'
+import BookUploadPanel  from '@/components/author/BookUploadPanel'
+import BookActions     from '@/components/author/BookActions'
+import CoverUpload     from '@/components/author/CoverUpload'
+import BookSettings    from '@/components/author/BookSettings'
+import FileViewer      from '@/components/author/FileViewer'
 
 type Params = { params: { id: string } }
 
@@ -19,12 +17,9 @@ export default async function BookDetailPage({ params }: Params) {
 
   const [
     [books],
-    [chapters],
     [files],
-    [statsRows],
     [readingStatsRows],
   ] = await Promise.all([
-    // 1. Core book data
     pool.execute(
       `SELECT b.*, p.name AS partner_name
        FROM books b
@@ -32,16 +27,9 @@ export default async function BookDetailPage({ params }: Params) {
        WHERE b.id = ? AND b.author_id = ? LIMIT 1`,
       [params.id, userId]
     ),
-    // 2. Chapters list
-    pool.execute(
-      `SELECT id, chapter_num, title, word_count, is_published, created_at
-       FROM chapters WHERE book_id = ? ORDER BY chapter_num ASC`,
-      [params.id]
-    ),
-    // 3. Latest file/AI job
     pool.execute(
       `SELECT bf.id, bf.format, bf.original_name, bf.file_size, bf.status AS file_status,
-              aj.id AS job_id, aj.status AS ai_status, aj.chapters_found,
+              aj.id AS job_id, aj.status AS ai_status,
               aj.error_msg AS ai_error, aj.finished_at
        FROM book_files bf
        LEFT JOIN ai_jobs aj ON aj.file_id = bf.id
@@ -49,15 +37,6 @@ export default async function BookDetailPage({ params }: Params) {
        ORDER BY bf.uploaded_at DESC LIMIT 1`,
       [params.id]
     ),
-    // 4. Chapter stats
-    pool.execute(
-      `SELECT 
-         SUM(CASE WHEN is_published = 1 THEN 1 ELSE 0 END) AS published_chapters,
-         COALESCE(SUM(word_count), 0) AS total_words
-       FROM chapters WHERE book_id = ?`,
-      [params.id]
-    ),
-    // 5. Reading stats
     pool.execute(
       `SELECT COUNT(*) AS total_reading_sessions FROM reading_progress WHERE book_id = ?`,
       [params.id]
@@ -68,14 +47,7 @@ export default async function BookDetailPage({ params }: Params) {
   if (!book) notFound()
 
   const latestFile = (files as any[])[0] || null
-  const chStats = (statsRows as any[])[0] || {}
   const rStats = (readingStatsRows as any[])[0] || {}
-
-  const bookStats = {
-    published_chapters: chStats.published_chapters || 0,
-    total_words: chStats.total_words || 0,
-    total_reading_sessions: rStats.total_reading_sessions || 0,
-  }
 
   const statusColors: Record<string, string> = {
     published: '#3dd6a3', in_review: '#9d7df5', draft: '#6b6b78', rejected: '#f07060',
@@ -118,16 +90,15 @@ export default async function BookDetailPage({ params }: Params) {
         </div>
 
         {/* Action buttons */}
-        <BookActions book={book} chapterCount={(chapters as any[]).length} />
+        <BookActions book={book} />
       </div>
 
       {/* Stats Row */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:12 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12 }}>
         {[
           { label:'Total Reads', value:book.total_reads?.toLocaleString() || '0', color:'#5ba4f5', icon:'👁' },
-          { label:'Chapters', value:`${bookStats.published_chapters}/${(chapters as any[]).length}`, color:'#9d7df5', icon:'📄' },
-          { label:'Words', value:(bookStats.total_words as number)?.toLocaleString() || '0', color:'#3dd6a3', icon:'✎' },
-          { label:'Readers', value:formatSessions(bookStats.total_reading_sessions || 0), color:'#e8c547', icon:'👤' },
+          { label:'Words', value:(book.total_words as number)?.toLocaleString() || '0', color:'#3dd6a3', icon:'✎' },
+          { label:'Readers', value:formatSessions(book.total_reading_sessions || 0), color:'#e8c547', icon:'👤' },
           { label:'Price', value:book.is_free ? 'Free' : `$${parseFloat(book.price || 0).toFixed(2)}`, color:'#3dd6a3', icon:'💰' },
         ].map(stat => (
           <div key={stat.label} style={{ background:'#151420', border:'1px solid #272635', borderRadius:8, padding:'12px 14px' }}>
@@ -148,28 +119,24 @@ export default async function BookDetailPage({ params }: Params) {
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1.4fr', gap:20, alignItems:'start' }}>
 
         <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-          {/* Cover upload */}
           <CoverUpload
             bookId={params.id}
             currentCover={book.cover_url || null}
             bookStatus={book.status}
           />
-          {/* Book file upload */}
           <BookUploadPanel bookId={params.id} bookStatus={book.status} latestFile={latestFile} />
-          {/* Preview button for book */}
-          <AuthorBookPreview
-            bookId={params.id}
-            bookTitle={book.title}
-            chapters={chapters as any[]}
-          />
-          {/* File viewer for PDF */}
           <FileViewer bookId={params.id} />
-          {/* Book settings */}
           <BookSettings book={book} />
         </div>
 
-        {/* Chapter list */}
-        <ChapterList bookId={params.id} chapters={chapters as any[]} bookStatus={book.status} />
+        {/* Placeholder for future content */}
+        <div style={{ background:'#151420', border:'1px solid #272635', borderRadius:10, padding:40, textAlign:'center' }}>
+          <div style={{ fontSize:48, marginBottom:16 }}>📚</div>
+          <div style={{ fontSize:16, fontWeight:700, color:'#eeecf8', marginBottom:8 }}>Book Content</div>
+          <div style={{ fontSize:13, color:'#635e80' }}>
+            Your book content will appear here after upload and processing.
+          </div>
+        </div>
       </div>
     </div>
   )

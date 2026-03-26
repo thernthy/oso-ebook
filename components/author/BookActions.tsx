@@ -4,20 +4,15 @@ import { useState }    from 'react'
 import { useRouter }   from 'next/navigation'
 
 interface Props {
-  book:         any
-  chapterCount: number
+  book: any
 }
 
-export default function BookActions({ book, chapterCount }: Props) {
+export default function BookActions({ book }: Props) {
   const router   = useRouter()
   const [loading, setLoading] = useState(false)
   const [msg,     setMsg]     = useState('')
 
   async function submitForReview() {
-    if (chapterCount === 0) {
-      setMsg('⚠ Upload a file first — no chapters detected yet')
-      return
-    }
     setLoading(true)
     const res = await fetch(`/api/books/${book.id}`, {
       method:  'PATCH',

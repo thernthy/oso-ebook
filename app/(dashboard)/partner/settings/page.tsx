@@ -8,7 +8,6 @@ const PERMISSIONS = [
   { key: 'upload_books', label: 'Upload Books' },
   { key: 'edit_own_books', label: 'Edit Own Books' },
   { key: 'delete_own_books', label: 'Delete Own Books' },
-  { key: 'manage_chapters', label: 'Manage Chapters' },
   { key: 'view_own_earnings', label: 'View Own Earnings' },
   { key: 'submit_for_review', label: 'Submit for Review' },
   { key: 'invite_co_authors', label: 'Invite Co-Authors' },

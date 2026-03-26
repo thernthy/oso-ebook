@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
-import { authOptions }      from '@/lib/auth'
-import pool                 from '@/lib/db'
-import Link                 from 'next/link'
+import { authOptions } from '@/lib/auth'
+import pool            from '@/lib/db'
+import Link            from 'next/link'
 
 const statusStyle: Record<string, { bg: string; color: string }> = {
   published: { bg:'rgba(61,214,163,0.12)',  color:'#3dd6a3' },
@@ -14,27 +14,18 @@ export default async function AuthorBooksPage() {
   const session = await getServerSession(authOptions)
   const userId  = session!.user.id
 
-  // Fetch books directly from DB (Server Component — no fetch overhead)
   const [books] = await pool.execute(
-    `SELECT
-       b.id, b.title, b.status, b.price, b.is_free, b.total_reads,
-       b.created_at, b.cover_url, b.category,
-       COUNT(DISTINCT c.id)                               AS chapter_count,
-       COUNT(DISTINCT CASE WHEN c.is_published=1 THEN c.id END) AS published_chapters,
-       bf.status                                          AS file_status,
-       aj.status                                          AS ai_status,
-       aj.chapters_found
+    `SELECT b.id, b.title, b.status, b.price, b.is_free, b.total_reads,
+            b.created_at, b.cover_url, b.category, b.total_words,
+            bf.status AS file_status
      FROM books b
-     LEFT JOIN chapters  c  ON c.book_id  = b.id
      LEFT JOIN book_files bf ON bf.book_id = b.id
-     LEFT JOIN ai_jobs   aj ON aj.book_id  = b.id
      WHERE b.author_id = ?
-     GROUP BY b.id, bf.status, aj.status, aj.chapters_found
+     GROUP BY b.id
      ORDER BY b.created_at DESC`,
     [userId]
   ) as any[]
 
-  // Stats summary
   const total     = (books as any[]).length
   const published = (books as any[]).filter((b: any) => b.status === 'published').length
   const drafts    = (books as any[]).filter((b: any) => b.status === 'draft').length
@@ -43,7 +34,6 @@ export default async function AuthorBooksPage() {
   return (
     <div style={{ flex:1, overflowY:'auto', padding:'24px 28px', display:'flex', flexDirection:'column', gap:20 }}>
 
-      {/* Topbar */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div>
           <div style={{ fontSize:20, fontWeight:800, color:'#eeecf8', letterSpacing:'-0.4px' }}>My Books</div>
@@ -57,7 +47,6 @@ export default async function AuthorBooksPage() {
         </Link>
       </div>
 
-      {/* Stats row */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:14 }}>
         {[
           { label:'Total', value:total,     color:'#9d7df5' },
@@ -72,7 +61,6 @@ export default async function AuthorBooksPage() {
         ))}
       </div>
 
-      {/* Books table */}
       <div style={{ background:'#151420', border:'1px solid #272635', borderRadius:10, overflow:'hidden' }}>
         <div style={{ padding:'14px 18px', borderBottom:'1px solid #272635', fontSize:13, fontWeight:700, color:'#eeecf8' }}>
           All Books
@@ -91,7 +79,7 @@ export default async function AuthorBooksPage() {
           <table style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead>
               <tr>
-                {['Title', 'Status', 'Chapters', 'Reads', 'Price', 'AI', ''].map(h => (
+                {['Title', 'Status', 'Words', 'Reads', 'Price', 'File', ''].map(h => (
                   <th key={h} style={{ padding:'10px 18px', textAlign:'left', fontSize:10, fontWeight:600, color:'#635e80', letterSpacing:'1.5px', textTransform:'uppercase', fontFamily:"'JetBrains Mono',monospace", borderBottom:'1px solid #272635', whiteSpace:'nowrap' }}>
                     {h}
                   </th>
@@ -113,27 +101,22 @@ export default async function AuthorBooksPage() {
                       </span>
                     </td>
                     <td style={{ padding:'12px 18px', fontFamily:"'JetBrains Mono',monospace", fontSize:12, color:'#eeecf8' }}>
-                      {book.published_chapters}/{book.chapter_count}
+                      {Number(book.total_words || 0).toLocaleString()}
                     </td>
                     <td style={{ padding:'12px 18px', fontFamily:"'JetBrains Mono',monospace", fontSize:12, color:'#eeecf8' }}>
-                      {book.total_reads.toLocaleString()}
+                      {book.total_reads?.toLocaleString() || '0'}
                     </td>
                     <td style={{ padding:'12px 18px', fontFamily:"'JetBrains Mono',monospace", fontSize:12, color:'#3dd6a3' }}>
-                      {book.is_free ? 'Free' : `$${parseFloat(book.price).toFixed(2)}`}
+                      {book.is_free ? 'Free' : `$${parseFloat(book.price || 0).toFixed(2)}`}
                     </td>
                     <td style={{ padding:'12px 18px' }}>
-                      {book.ai_status === 'done' && (
-                        <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", color:'#3dd6a3' }}>
-                          ✓ {book.chapters_found} found
-                        </span>
+                      {book.file_status === 'processed' && (
+                        <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", color:'#3dd6a3' }}>✓ Ready</span>
                       )}
-                      {book.ai_status === 'running' && (
+                      {book.file_status === 'processing' && (
                         <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", color:'#e8c547' }}>⟳ processing</span>
                       )}
-                      {book.ai_status === 'failed' && (
-                        <span style={{ fontSize:10, fontFamily:"'JetBrains Mono',monospace", color:'#f07060' }}>⚠ failed</span>
-                      )}
-                      {!book.ai_status && (
+                      {!book.file_status && (
                         <span style={{ fontSize:10, color:'#635e80', fontFamily:"'JetBrains Mono',monospace" }}>—</span>
                       )}
                     </td>

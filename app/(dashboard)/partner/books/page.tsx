@@ -1,37 +1,30 @@
 import { getServerSession } from 'next-auth'
-import { authOptions }      from '@/lib/auth'
-import pool                 from '@/lib/db'
-import ReviewActions        from '@/components/partner/ReviewActions'
+import { authOptions } from '@/lib/auth'
+import pool            from '@/lib/db'
+import ReviewActions   from '@/components/partner/ReviewActions'
 
 export default async function PartnerBooksPage() {
   const session   = await getServerSession(authOptions)
   const partnerId = session!.user.id
 
-  // Books in review queue for this partner
   const [inReview] = await pool.execute(
-    `SELECT b.id, b.title, b.description, b.category, b.created_at,
-            u.name AS author_name, u.email AS author_email,
-            COUNT(c.id) AS chapter_count,
-            SUM(c.word_count) AS total_words
+    `SELECT b.id, b.title, b.description, b.category, b.created_at, b.total_words,
+            u.name AS author_name, u.email AS author_email
      FROM books b
      JOIN users u ON b.author_id = u.id
-     LEFT JOIN chapters c ON c.book_id = b.id
      WHERE b.partner_id = ? AND b.status = 'in_review'
-     GROUP BY b.id ORDER BY b.updated_at DESC`,
+     ORDER BY b.updated_at DESC`,
     [partnerId]
   ) as any[]
 
-  // All books in catalog with status breakdown
   const [allBooks] = await pool.execute(
     `SELECT b.id, b.title, b.status, b.price, b.is_free,
-            b.total_reads, b.created_at,
-            u.name AS author_name,
-            COUNT(c.id) AS chapter_count
+            b.total_reads, b.total_words, b.created_at,
+            u.name AS author_name
      FROM books b
      JOIN users u ON b.author_id = u.id
-     LEFT JOIN chapters c ON c.book_id = b.id
      WHERE b.partner_id = ?
-     GROUP BY b.id ORDER BY b.created_at DESC LIMIT 20`,
+     ORDER BY b.created_at DESC LIMIT 20`,
     [partnerId]
   ) as any[]
 
@@ -75,7 +68,7 @@ export default async function PartnerBooksPage() {
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:14, fontWeight:700, color:'#edf0f0' }}>{book.title}</div>
                 <div style={{ fontSize:11, color:'#5e6b70', fontFamily:"'JetBrains Mono',monospace", marginTop:2 }}>
-                  {book.author_name} · {book.chapter_count} chapters · {Number(book.total_words || 0).toLocaleString()} words
+                  {book.author_name} · {Number(book.total_words || 0).toLocaleString()} words
                 </div>
                 {book.description && (
                   <div style={{ fontSize:12, color:'#5e6b70', marginTop:6, lineHeight:1.5, maxWidth:500 }}>
@@ -97,7 +90,7 @@ export default async function PartnerBooksPage() {
         <table style={{ width:'100%', borderCollapse:'collapse' }}>
           <thead>
             <tr>
-              {['Title','Author','Status','Chapters','Reads','Price'].map(h => (
+              {['Title','Author','Status','Words','Reads','Price'].map(h => (
                 <th key={h} style={{ padding:'10px 18px', textAlign:'left', fontSize:10, fontWeight:600, color:'#5e6b70', letterSpacing:'1.5px', textTransform:'uppercase', fontFamily:"'JetBrains Mono',monospace", borderBottom:'1px solid #252c30' }}>{h}</th>
               ))}
             </tr>
@@ -114,7 +107,7 @@ export default async function PartnerBooksPage() {
                       {b.status.replace('_',' ')}
                     </span>
                   </td>
-                  <td style={{ padding:'11px 18px', fontSize:12, fontFamily:"'JetBrains Mono',monospace", color:'#edf0f0' }}>{b.chapter_count}</td>
+                  <td style={{ padding:'11px 18px', fontSize:12, fontFamily:"'JetBrains Mono',monospace", color:'#edf0f0' }}>{Number(b.total_words || 0).toLocaleString()}</td>
                   <td style={{ padding:'11px 18px', fontSize:12, fontFamily:"'JetBrains Mono',monospace", color:'#edf0f0' }}>{b.total_reads?.toLocaleString()}</td>
                   <td style={{ padding:'11px 18px', fontSize:12, fontFamily:"'JetBrains Mono',monospace", color:'#3dd6a3' }}>
                     {b.is_free ? 'Free' : `$${parseFloat(b.price).toFixed(2)}`}
