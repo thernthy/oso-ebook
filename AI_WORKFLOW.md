@@ -1,4 +1,11 @@
 STEP work
+ROLE Auther
+1 improve upload file check admin setting on file extention setting and text explain shoud follow by that.
+http://localhost:3000/author/books/36099bf8-2462-11f1-86f4-e4a8dff9d9b6
+remove this Chapters and check if there any database related also delete
+add privew button.
+2 add privew book with 3d book flip
+http://localhost:3000/author/books
 
 STEP plan
 READ requirements

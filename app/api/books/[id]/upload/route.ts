@@ -6,8 +6,24 @@ import { ok, err, requirePermission } from '@/lib/api-helpers'
 
 type Params = { params: { id: string } }
 
-const ALLOWED_FORMATS = ['pdf', 'epub', 'docx', 'txt'] as const
-const MAX_SIZE_BYTES  = 50 * 1024 * 1024  // 50 MB default
+const DEFAULT_FORMATS = ['pdf', 'epub', 'docx', 'txt']
+const DEFAULT_MAX_MB = 50
+
+async function getUploadSettings() {
+  const [rows] = await pool.execute(
+    'SELECT setting_key, value FROM platform_settings WHERE setting_key IN (?, ?)',
+    ['allowed_formats', 'max_upload_mb']
+  ) as any[]
+  const settings: Record<string, string> = {}
+  for (const row of rows as any[]) {
+    settings[row.setting_key] = row.value
+  }
+  const formats = settings.allowed_formats
+    ? settings.allowed_formats.split(',').map((f: string) => f.trim().toLowerCase()).filter(Boolean)
+    : DEFAULT_FORMATS
+  const maxMb = settings.max_upload_mb ? parseInt(settings.max_upload_mb, 10) : DEFAULT_MAX_MB
+  return { formats, maxMb }
+}
 
 // ─── POST /api/books/:id/upload ───────────────────────────────
 // Author uploads a book file. Stores it and queues AI processing.
@@ -31,15 +47,19 @@ export async function POST(req: NextRequest, { params }: Params) {
   const file     = formData.get('file') as File | null
   if (!file) return err('No file provided')
 
+  // Get upload settings from admin
+  const { formats: allowedFormats, maxMb } = await getUploadSettings()
+  const maxSizeBytes = maxMb * 1024 * 1024
+
   // Validate size
-  if (file.size > MAX_SIZE_BYTES) {
-    return err(`File too large. Max size is ${MAX_SIZE_BYTES / 1024 / 1024}MB`)
+  if (file.size > maxSizeBytes) {
+    return err(`File too large. Max size is ${maxMb}MB`)
   }
 
   // Detect format
   const format = detectFormat(file.name, file.type)
-  if (!format || !ALLOWED_FORMATS.includes(format as any)) {
-    return err(`Unsupported format. Allowed: ${ALLOWED_FORMATS.join(', ')}`)
+  if (!format || !allowedFormats.includes(format.toLowerCase())) {
+    return err(`Unsupported format. Allowed: ${allowedFormats.join(', ')}`)
   }
 
   // Read file buffer

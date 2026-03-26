@@ -9,6 +9,7 @@ import BookActions          from '@/components/author/BookActions'
 import CoverUpload          from '@/components/author/CoverUpload'
 import BookSettings         from '@/components/author/BookSettings'
 import FileViewer            from '@/components/author/FileViewer'
+import AuthorBookPreview    from '@/components/author/AuthorBookPreview'
 
 type Params = { params: { id: string } }
 
@@ -117,7 +118,14 @@ export default async function BookDetailPage({ params }: Params) {
         </div>
 
         {/* Action buttons */}
-        <BookActions book={book} chapterCount={(chapters as any[]).length} />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <AuthorBookPreview
+            bookId={params.id}
+            bookTitle={book.title}
+            chapters={chapters as any[]}
+          />
+          <BookActions book={book} chapterCount={(chapters as any[]).length} />
+        </div>
       </div>
 
       {/* Stats Row */}

@@ -14,9 +14,32 @@ export default function BookUploadPanel({ bookId, bookStatus, latestFile }: Prop
   const [progress,  setProgress]  = useState('')
   const [aiStatus,  setAiStatus]  = useState(latestFile?.ai_status || '')
   const [error,     setError]     = useState('')
+  const [allowedFormats, setAllowedFormats] = useState('pdf,epub,docx,txt')
+  const [maxUploadMb, setMaxUploadMb] = useState(50)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const canUpload = ['draft', 'rejected'].includes(bookStatus)
+
+  // Fetch admin upload settings
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const res = await fetch('/api/admin/settings?key=allowed_formats')
+        const data = await res.json()
+        if (data.data?.settings?.allowed_formats) {
+          setAllowedFormats(data.data.settings.allowed_formats)
+        }
+      } catch {}
+      try {
+        const res = await fetch('/api/admin/settings?key=max_upload_mb')
+        const data = await res.json()
+        if (data.data?.settings?.max_upload_mb) {
+          setMaxUploadMb(parseInt(data.data.settings.max_upload_mb, 10))
+        }
+      } catch {}
+    }
+    fetchSettings()
+  }, [])
 
   // Poll AI job status every 3s while processing
   useEffect(() => {
@@ -135,7 +158,7 @@ export default function BookUploadPanel({ bookId, bookStatus, latestFile }: Prop
                 {uploading ? progress : 'Drop file here or click to browse'}
               </div>
               <div style={{ fontSize:11, color:'#635e80', fontFamily:"'JetBrains Mono',monospace" }}>
-                PDF, EPUB, DOCX, TXT · max 50MB
+                {allowedFormats.toUpperCase()} · max {maxUploadMb}MB
               </div>
               {latestFile && (
                 <div style={{ fontSize:11, color:'#9d7df5', fontFamily:"'JetBrains Mono',monospace", marginTop:6 }}>
@@ -143,7 +166,7 @@ export default function BookUploadPanel({ bookId, bookStatus, latestFile }: Prop
                 </div>
               )}
             </div>
-            <input ref={inputRef} type="file" accept=".pdf,.epub,.docx,.txt" style={{ display:'none' }}
+            <input ref={inputRef} type="file" accept={allowedFormats.split(',').map(f => `.${f.trim()}`).join(',')} style={{ display:'none' }}
               onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
           </>
         )}

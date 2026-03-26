@@ -36,6 +36,8 @@ Permission errors return `403`. Auth errors return `401`.
 | DELETE | `/books/:id`                 | author or OSO    | Delete book                          |
 | GET    | `/books/:id/chapters`        | any role         | List chapters                        |
 | POST   | `/books/:id/chapters`        | `manage:chapters`| Add chapter (author only)            |
+| GET    | `/books/:id/upload`           | `upload:books`   | Check upload/processing status       |
+| POST   | `/books/:id/upload`           | `upload:books`   | Upload book file (format/size from admin settings) |
 
 **GET /books query params:**
 - `status` — draft, in_review, published, rejected
@@ -103,10 +105,29 @@ All responses follow this structure:
 | Method | Route                  | Permission | Description                       |
 |--------|------------------------|------------|-----------------------------------|
 | GET    | `/platform/config`     | public     | Get public platform settings      |
+| GET    | `/admin/settings`      | `manage:platform` | Get all platform settings    |
+| PATCH  | `/admin/settings`      | `manage:platform` | Update platform settings     |
 
 **GET /platform/config?key=phone_prefix**
 
 Returns `{ success: true, settings: { phone_prefix: "+855" } }`
+
+**GET /admin/settings?key=allowed_formats** or **GET /admin/settings**
+
+Returns `{ success: true, settings: { allowed_formats: "pdf,epub,docx,txt", max_upload_mb: "50", ... } }`
+
+**PATCH /admin/settings** (body):
+```json
+{
+  "allowed_formats": "pdf,epub,docx,txt",
+  "max_upload_mb": "50",
+  "revenue_author_pct": "70",
+  "revenue_partner_pct": "20",
+  "revenue_platform_pct": "10"
+}
+```
+
+Editable keys: `storage_provider`, `storage_local_dir`, `storage_s3_*`, `max_upload_mb`, `allowed_formats`, `cover_*`, `revenue_*`, `phone_prefix`
 
 ---
 

@@ -33,9 +33,9 @@ The OSO E-Book Platform is a multi-role digital publishing system built with **N
 - `components/`: Reusable UI components.
   - `ui/`: Generic UI elements (AccountPopup, etc.).
   - `[role]/`: Role-specific components.
-    - `author/`: BookUploadPanel, ChapterList, BookActions, CoverUpload, BookSettings, FileViewer.
-    - `partner/`: ReviewActions.
-    - `reader/`: BookReader.
+    - `author/`: BookUploadPanel, ChapterList, BookActions, CoverUpload, BookSettings, FileViewer, AuthorBookPreview.
+     - `partner/`: ReviewActions.
+     - `reader/`: BookReader (3D flip book reader with themes, fonts, progress tracking).
 - `lib/`: Utility libraries.
   - `db.ts`: Database connection pool. Implements a **singleton pattern** for development to prevent "Too many connections" errors during hot-reloads.
   - `permissions.ts`: Role-based access control logic.
@@ -96,7 +96,8 @@ Access control is enforced via `middleware.ts` and per-route checks in API handl
 - Book stats row: total reads, chapters, words, reading time, price.
 - Breadcrumb navigation.
 - Cover upload with cropping and preview.
-- Book file upload with AI chapter detection.
+- Book file upload with AI chapter detection (formats/size configurable via admin settings).
+- **AuthorBookPreview**: Preview button to open 3D flip book reader modal.
 - **FileViewer**: PDF preview with zoom controls and download.
 - **Chapter list**: publish toggle, edit title, delete chapters.
 - **Split Chapters**: AI-powered chapter detection from uploaded file.
