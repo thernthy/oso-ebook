@@ -23,12 +23,15 @@ interface Analysis {
 interface Props {
   bookId:       string
   currentCover: string | null
+  currentBackCover?: string | null
   bookStatus:   string
 }
 
 type Stage = 'idle' | 'uploading' | 'preview' | 'confirming' | 'done' | 'error'
 
-export default function CoverUpload({ bookId, currentCover, bookStatus }: Props) {
+const ALLOWED_MIME = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+
+export default function CoverUpload({ bookId, currentCover, currentBackCover, bookStatus }: Props) {
   const router    = useRouter()
   const inputRef  = useRef<HTMLInputElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,6 +47,8 @@ export default function CoverUpload({ bookId, currentCover, bookStatus }: Props)
   const [isDraggingCrop, setIsDraggingCrop] = useState(false)
   const [dragStart,  setDragStart]  = useState({ x: 0, y: 0, cropLeft: 0, cropTop: 0 })
   const [savedCover, setSavedCover] = useState<string | null>(currentCover)
+  const [savedBackCover, setSavedBackCover] = useState<string | null>(currentBackCover || null)
+  const [backCoverUploading, setBackCoverUploading] = useState(false)
   const [error,      setError]      = useState('')
 
   const canEdit = ['draft', 'rejected', 'in_review'].includes(bookStatus)
@@ -431,6 +436,110 @@ export default function CoverUpload({ bookId, currentCover, bookStatus }: Props)
             if (el && imageB64) regeneratePreview(imageB64, crop, analysis)
           }} />
       )}
+
+      {/* Back Cover Upload Section */}
+      <div style={{ padding:'14px 18px', borderTop:'1px solid #272635', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div style={{ fontSize:13, fontWeight:700, color:'#eeecf8' }}>Back Cover</div>
+        <div style={{ fontSize:10, color:'#635e80', fontFamily:"'JetBrains Mono',monospace" }}>
+          Optional · Same size as front cover
+        </div>
+      </div>
+
+      <div style={{ padding:18, paddingTop:0, display:'flex', gap:20, alignItems:'flex-start' }}>
+        <div style={{ flexShrink:0 }}>
+          <div style={{ width:100, height:150, borderRadius:8, overflow:'hidden', background:'rgba(157,125,245,0.08)', border:'1px solid #272635', display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
+            {savedBackCover ? (
+              <img src={savedBackCover} alt="Back Cover" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            ) : (
+              <div style={{ textAlign:'center', color:'#635e80' }}>
+                <div style={{ fontSize:28 }}>📗</div>
+                <div style={{ fontSize:9, fontFamily:"'JetBrains Mono',monospace", marginTop:4 }}>No back</div>
+              </div>
+            )}
+          </div>
+          {savedBackCover && canEdit && (
+            <button onClick={async () => {
+              if (!confirm('Remove back cover?')) return
+              try {
+                const res = await fetch(`/api/books/${bookId}/back-cover`, { method: 'DELETE' })
+                const data = await res.json()
+                if (data.success) setSavedBackCover(null)
+              } catch {}
+            }}
+              style={{ marginTop:6, width:'100%', padding:'4px', borderRadius:4, background:'transparent', border:'1px solid rgba(240,112,96,0.25)', color:'#f07060', fontSize:10, cursor:'pointer', fontFamily:"'JetBrains Mono',monospace" }}>
+              Remove
+            </button>
+          )}
+        </div>
+
+        <div style={{ flex:1 }}>
+          {canEdit && (
+            <>
+              <div
+                onDragOver={e => { e.preventDefault() }}
+                onDrop={async (e) => {
+                  e.preventDefault()
+                  const f = e.dataTransfer.files[0]
+                  if (f && ALLOWED_MIME.includes(f.type)) {
+                    setBackCoverUploading(true)
+                    const form = new FormData()
+                    form.append('file', f)
+                    try {
+                      const res = await fetch(`/api/books/${bookId}/back-cover`, { method: 'POST', body: form })
+                      const data = await res.json()
+                      if (data.success && data.data?.url) {
+                        setSavedBackCover(data.data.url)
+                      }
+                    } catch {}
+                    setBackCoverUploading(false)
+                  }
+                }}
+                onClick={() => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = ALLOWED_MIME.join(',')
+                  input.onchange = async (e: any) => {
+                    const f = e.target.files?.[0]
+                    if (f) {
+                      setBackCoverUploading(true)
+                      const form = new FormData()
+                      form.append('file', f)
+                      try {
+                        const res = await fetch(`/api/books/${bookId}/back-cover`, { method: 'POST', body: form })
+                        const data = await res.json()
+                        if (data.success && data.data?.url) {
+                          setSavedBackCover(data.data.url)
+                        }
+                      } catch {}
+                      setBackCoverUploading(false)
+                    }
+                  }
+                  input.click()
+                }}
+                style={{
+                  border:       '1.5px dashed #2e3252',
+                  borderRadius: 8,
+                  padding:      '16px',
+                  textAlign:    'center',
+                  cursor:       'pointer',
+                  background:   'transparent',
+                  transition:   'all .15s',
+                }}>
+                {backCoverUploading ? (
+                  <div style={{ fontSize:13, color:'#9d7df5' }}>Uploading...</div>
+                ) : (
+                  <>
+                    <div style={{ fontSize:20, marginBottom:4 }}>🖼</div>
+                    <div style={{ fontSize:12, fontWeight:600, color:'#eeecf8' }}>
+                      {savedBackCover ? 'Replace back cover' : 'Upload back cover'}
+                    </div>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

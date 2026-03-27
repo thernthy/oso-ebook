@@ -91,7 +91,7 @@ export default async function BookDetailPage({ params }: Params) {
         </div>
 
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <BookPreview bookId={params.id} bookTitle={book.title} />
+          <BookPreview bookId={params.id} bookTitle={book.title} coverUrl={book.cover_url} backCoverUrl={book.back_cover_url} />
           <BookActions book={book} />
         </div>
       </div>
@@ -124,6 +124,7 @@ export default async function BookDetailPage({ params }: Params) {
           <CoverUpload
             bookId={params.id}
             currentCover={book.cover_url || null}
+            currentBackCover={book.back_cover_url || null}
             bookStatus={book.status}
           />
           <BookUploadPanel bookId={params.id} bookStatus={book.status} latestFile={latestFile} />
