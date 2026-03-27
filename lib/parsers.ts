@@ -71,16 +71,17 @@ async function parseDOCX(buffer: Buffer): Promise<string> {
 
 async function parseEPUB(buffer: Buffer): Promise<string> {
   try {
-    const EPub = (await import('epub2')).EPub
-    return new Promise((resolve) => {
-      const parser = new EPub(buffer as any)
-      parser.on('end', () => {
-        const texts = parser.flow.map((section: any) => section.data || '').join('\n')
-        resolve(texts)
-      })
-      parser.on('error', () => resolve(''))
-      parser.parse()
-    })
+    const epub = (await import('epub')).default
+    const parser = new epub(buffer as any)
+    await parser.parse()
+    const chapters: string[] = []
+    for (const item of parser.spine.contents) {
+      try {
+        const text = await parser.getChapter(item.id)
+        chapters.push(text.replace(/<[^>]+>/g, ' '))
+      } catch {}
+    }
+    return chapters.join('\n\n')
   } catch (e) {
     console.error('EPUB parsing error:', e)
     return ''

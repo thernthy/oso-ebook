@@ -33,31 +33,17 @@ async function parseDocx(buffer: Buffer): Promise<ParseResult> {
 
 // ─── EPUB ─────────────────────────────────────────────────────
 async function parseEpub(buffer: Buffer): Promise<ParseResult> {
-  // Write to tmp file — epub parser needs a path
-  const { EPub } = await import('epub2')
-  const os       = await import('os')
-  const fs       = await import('fs/promises')
-  const path     = await import('path')
+  const EPub = (await import('epub')).default
+  const parser = new EPub(buffer)
+  await parser.parse()
 
-  const tmpPath = path.join(os.tmpdir(), `oso-${Date.now()}.epub`)
-  await fs.writeFile(tmpPath, buffer)
-
-  const book = await EPub.createAsync(tmpPath)
   const chapters: string[] = []
-
-  for (const chapter of book.flow) {
+  for (const item of parser.spine.contents) {
     try {
-      const text = await new Promise<string>((res, rej) => {
-        book.getChapter(chapter.id, (err: any, txt: string) => {
-          if (err) rej(err)
-          else res(txt.replace(/<[^>]+>/g, ' '))
-        })
-      })
-      chapters.push(text)
+      const text = await parser.getChapter(item.id)
+      chapters.push(text.replace(/<[^>]+>/g, ' '))
     } catch {}
   }
-
-  await fs.unlink(tmpPath).catch(() => {})
 
   const fullText = chapters.join('\n\n')
   return {
