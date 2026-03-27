@@ -1,4 +1,4 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 -- ─── Custom Partner Roles ──────────────────────────────────
 -- Partners can create custom roles for their authors

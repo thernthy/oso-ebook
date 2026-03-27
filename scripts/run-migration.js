@@ -7,7 +7,7 @@ async function runMigration() {
     port: Number(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'oso_ebook',
+    database: process.env.DB_NAME || 'freedb_oso_db',
   });
 
   const statements = [

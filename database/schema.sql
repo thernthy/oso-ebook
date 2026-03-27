@@ -13,7 +13,7 @@
 CREATE TABLE oso_config (
     id SERIAL PRIMARY KEY,
     key VARCHAR(100) UNIQUE NOT NULL,
-    value JSONB,
+    value JSON,
     description TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -84,7 +84,7 @@ CREATE TABLE partners (
     
     -- Contact
     contact_phone VARCHAR(50),
-    contact_address JSONB, -- {street, city, country, postal}
+    contact_address JSON, -- {street, city, country, postal}
     
     -- Contract
     contract_start_date DATE,
@@ -112,11 +112,11 @@ CREATE TABLE authors (
     pen_name VARCHAR(100), -- Can be different from display_name
     signature TEXT, -- Author bio/signature
     website_url TEXT,
-    social_links JSONB, -- {twitter, facebook, instagram, etc}
+    social_links JSON, -- {twitter, facebook, instagram, etc}
     
     -- Partner Relationship (optional - author can be independent or under partner)
     partner_id INTEGER REFERENCES partners(id),
-    partner_contract JSONB, -- custom terms if under partner
+    partner_contract JSON, -- custom terms if under partner
     
     -- Stats
     total_books INTEGER DEFAULT 0,
@@ -343,8 +343,8 @@ CREATE TABLE audit_logs (
     target_id INTEGER,
     
     action VARCHAR(100) NOT NULL, -- 'created', 'updated', 'deleted', 'banned', etc.
-    old_value JSONB,
-    new_value JSONB,
+    old_value JSON,
+    new_value JSON,
     
     ip_address INET,
     user_agent TEXT,

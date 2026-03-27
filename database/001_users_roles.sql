@@ -1,8 +1,8 @@
--- oso-ebook database setup
+-- freedb_oso_db database setup
 -- Run once: mysql -u root -p < database/001_users_roles.sql
 
-CREATE DATABASE IF NOT EXISTS oso_ebook CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE oso_ebook;
+CREATE DATABASE IF NOT EXISTS freedb_oso_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE freedb_oso_db;
 
 CREATE TABLE IF NOT EXISTS users (
   id         CHAR(36)     NOT NULL PRIMARY KEY DEFAULT (UUID()),

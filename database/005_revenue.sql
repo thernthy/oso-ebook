@@ -1,4 +1,4 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 -- ─── Earnings ledger ─────────────────────────────────────────
 -- Every purchase creates earnings rows for author + partner + platform

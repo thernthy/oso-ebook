@@ -1,4 +1,4 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 -- ─── Books ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS books (

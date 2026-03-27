@@ -1,13 +1,13 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 -- ─── Book cover metadata ────────────────────────────────────────
 -- Add to books table if upgrading from earlier migration
 ALTER TABLE books
-  ADD COLUMN IF NOT EXISTS cover_thumb_url   VARCHAR(500) NULL AFTER cover_url,
-  ADD COLUMN IF NOT EXISTS cover_width       INT          NULL AFTER cover_thumb_url,
-  ADD COLUMN IF NOT EXISTS cover_height      INT          NULL AFTER cover_width,
-  ADD COLUMN IF NOT EXISTS cover_storage_key VARCHAR(500) NULL AFTER cover_height,
-  ADD COLUMN IF NOT EXISTS cover_thumb_key   VARCHAR(500) NULL AFTER cover_storage_key;
+  ADD COLUMN cover_thumb_url   VARCHAR(500) NULL AFTER cover_url,
+  ADD COLUMN cover_width       INT          NULL AFTER cover_thumb_url,
+  ADD COLUMN cover_height      INT          NULL AFTER cover_width,
+  ADD COLUMN cover_storage_key VARCHAR(500) NULL AFTER cover_height,
+  ADD COLUMN cover_thumb_key   VARCHAR(500) NULL AFTER cover_storage_key;
 
 -- ─── Platform settings (OSO configures storage provider here) ─
 CREATE TABLE IF NOT EXISTS platform_settings (

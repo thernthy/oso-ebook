@@ -1,4 +1,4 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 -- purchases already created in 002, ensure it exists
 CREATE TABLE IF NOT EXISTS purchases (
@@ -14,10 +14,10 @@ CREATE TABLE IF NOT EXISTS purchases (
 
 -- reading_progress already created in 002, extend it
 ALTER TABLE reading_progress
-  ADD COLUMN IF NOT EXISTS scroll_pct    TINYINT  NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS page_num      INT      NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS total_pages   INT      NOT NULL DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS time_spent_s  INT      NOT NULL DEFAULT 0;
+  ADD COLUMN scroll_pct    TINYINT  NOT NULL DEFAULT 0,
+  ADD COLUMN page_num      INT      NOT NULL DEFAULT 1,
+  ADD COLUMN total_pages   INT      NOT NULL DEFAULT 1,
+  ADD COLUMN time_spent_s  INT      NOT NULL DEFAULT 0;
 
 -- bookmarks already created in 004, ensure it exists
 CREATE TABLE IF NOT EXISTS bookmarks (

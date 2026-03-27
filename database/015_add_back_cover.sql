@@ -1,3 +1,3 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 ALTER TABLE books ADD COLUMN back_cover_url VARCHAR(500) NULL AFTER cover_url;

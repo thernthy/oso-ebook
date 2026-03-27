@@ -1,4 +1,4 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 -- ─── Author-Partner Relationship & Reviews ─────────────────────────────────────
 -- Manages the relationship between authors and partners with reviews/ratings

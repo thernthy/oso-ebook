@@ -1,4 +1,4 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 CREATE TABLE IF NOT EXISTS ip_rules (
   id          CHAR(36)      NOT NULL PRIMARY KEY DEFAULT (UUID()),

@@ -1,4 +1,4 @@
-USE oso_ebook;
+USE freedb_oso_db;
 
 -- ─── Partner Applications ─────────────────────────────────────
 -- Tracks partner onboarding requests before they become users
