@@ -209,7 +209,6 @@ export default function BookPreview({ bookId, bookTitle, coverUrl, backCoverUrl 
         alignItems: 'center', 
         justifyContent: 'center', 
         width: '100%',
-        paddingTop: 52,
       }}>
         {loading ? (
           <div style={{ textAlign: 'center', color: '#666' }}>
